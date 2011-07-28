@@ -1,0 +1,2 @@
+trace_event is a repackaging of Chrome's trace_event viewer to run as a standalone WxPython or PyGtk app.
+
