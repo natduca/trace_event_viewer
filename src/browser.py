@@ -32,7 +32,7 @@ except ImportError:
   pass
 
 class BrowserBase(object):
-  def __init__(self, baseurl):
+  def __init__(self):
     pass
 
 

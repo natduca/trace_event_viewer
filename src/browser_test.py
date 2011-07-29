@@ -20,7 +20,7 @@ from frontend_daemon_host import FrontendDaemonHost
 class BrowserTest(unittest.TestCase):
   def setUp(self):
     self.host = FrontendDaemonHost(12345, os.getcwd())
-    self.browser = browser.Browser(self.host.baseurl)
+    self.browser = browser.Browser()
 
   def test_browser(self):
     self.browser.Show()

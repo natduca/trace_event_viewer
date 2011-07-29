@@ -55,14 +55,14 @@ def quit_main_loop():
   _app.ExitMainLoop()
 
 class BrowserWx(wx.Frame,BrowserBase):
-  def __init__(self, baseurl):
+  def __init__(self):
     _init_app()
     wx.Frame.__init__(self, None, -1, "TraceViewer")
-    BrowserBase.__init__(self, baseurl)
+    BrowserBase.__init__(self)
     self._webview  = wx.webkit.WebKitCtrl(self, -1)
 
   def load_url(self, url):
-    self._webview.LoadURL("http://www.google.com")
+    self._webview.LoadURL(url)
 
 """Alias for BrowserWx"""
 Browser = BrowserWx
