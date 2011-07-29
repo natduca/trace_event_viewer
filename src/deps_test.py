@@ -26,7 +26,7 @@ class DepsTest(unittest.TestCase):
     if rev == 'HEAD':
       base = deps.CHROME_SVN_BASE
     else:
-      base = deps.CHROME_SVN_BASE.replace("/svn/", "/svn/!svn/bc/%s/")
+      base = deps.CHROME_SVN_BASE.replace("/svn/", "/svn/!svn/bc/%s/" % rev)
 
     self.assertTrue(base.endswith('/'))
     urllib2.urlopen(base).read()
