@@ -20,5 +20,8 @@ class FrontendDownloadTest(unittest.TestCase):
     fe = FrontendDownload(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
     ok, _ = fe.verify_checkout()
     self.assertTrue(ok)
+    rev = fe.svn_getrev(fe.shared_path)
+    if type(deps.CHROME_SVN_REV) == int:
+      self.assertEquals(rev, deps.CHROME_SVN_REV)
     fe.close()
     

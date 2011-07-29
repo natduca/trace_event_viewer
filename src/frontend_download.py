@@ -14,9 +14,11 @@
 import os
 import logging
 import tempfile
+import re
 import shlex
 import subprocess
 import urllib
+
 
 class FrontendDownload(object):
   def __init__(self, base_url, rev, persist = True):
@@ -55,8 +57,11 @@ class FrontendDownload(object):
     try:
       if os.path.exists(dest) and os.path.isdir(dest):
         os.chdir(dest)
+        if self.svn_getrev(dest) == rev:
+          logging.debug('copy of %s is up-to-date')
+          return
         logging.debug('updating copy of %s to %s' % (url, rev))
-        ret,msg = self.system2(['svn', 'update', '-r', rev])
+        ret,msg = self.system2(['svn', 'update', '-r', str(rev)])
         if ret == 0:
           return
         logging.warning(msg)
@@ -68,9 +73,27 @@ class FrontendDownload(object):
 
   def svn_checkout(self, url, rev, dest):
     logging.debug('checking out %s at %s' % (url, rev))
-    ret,res = self.system2(['svn', 'checkout', url, '-r', rev, dest])
+    ret,res = self.system2(['svn', 'checkout', url, '-r', str(rev), dest])
     if ret != 0:
       raise Exception, res
+
+  def svn_getrev(self, dest):
+    oldcwd = os.getcwd()
+    try:
+      if not os.path.exists(dest):
+        return -1
+      if not os.path.isdir(os.path.join(dest, ".svn")):
+        return -1
+      os.chdir(dest)
+      logging.debug('checking rev at %s' % (dest))
+      ret,res = self.system2(['svn', 'info', '.'])
+      m = re.search("Revision: (\d+)", res)
+      if ret == 0 and m:
+        return int(m.group(1))
+      else:
+        return -1
+    finally:
+      os.chdir(oldcwd)
 
   def system(self, cmd):
     return self.system2(cmd)[0]
