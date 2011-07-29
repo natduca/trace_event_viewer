@@ -15,6 +15,7 @@
 import logging
 import optparse
 import os
+import platform
 import re
 import sys
 import types
@@ -66,6 +67,14 @@ def discover(filters):
         subsuites.append(new_suite)
 
   return unittest.TestSuite(subsuites)
+
+if __name__ == '__main__':
+  if platform.system() == 'Darwin':
+    if os.getenv('VERSIONER_PYTHON_PREFER_32_BIT') != 'yes':
+      os.putenv('VERSIONER_PYTHON_PREFER_32_BIT', 'yes')
+      args = [sys.executable]
+      args.extend(sys.argv)
+      os.execv(args[0], args)
 
 if __name__ == "__main__":
   parser = optparse.OptionParser()
