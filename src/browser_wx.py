@@ -48,8 +48,17 @@ def post_task(cb, *args):
     _pending_tasks_timer.Start(11, True)
 
 def run_main_loop():
+  global _app
+  global _pending_tasks_timer
   _init_app()
   _app.MainLoop()
+  for w in wx.GetTopLevelWindows():
+    w.Destroy()
+  _run_pending_tasks(None)
+  _app.Destroy()
+  _pending_tasks_timer.Destroy()
+  _pending_tasks_timer = None
+  _app = None
 
 def quit_main_loop():
   _app.ExitMainLoop()
