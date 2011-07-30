@@ -56,8 +56,9 @@ def run_main_loop():
     w.Destroy()
   _run_pending_tasks(None)
   _app.Destroy()
-  _pending_tasks_timer.Destroy()
-  _pending_tasks_timer = None
+  if _pending_tasks_timer:
+    _pending_tasks_timer.Destroy()
+    _pending_tasks_timer = None
   _app = None
 
 def quit_main_loop():
