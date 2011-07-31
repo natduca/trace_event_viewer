@@ -14,6 +14,8 @@
 # limitations under the License.
 import message_loop
 
+default_size = (1200,800)
+
 class BrowserBase(object):
   def __init__(self):
     pass

@@ -21,7 +21,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
   def __init__(self):
     import message_loop_wx
     message_loop_wx._init_app()
-    wx.Frame.__init__(self, None, -1, "TraceViewer")
+    wx.Frame.__init__(self, None, -1, "TraceViewer",size=browser.default_size)
     browser.BrowserBase.__init__(self)
 
     self._webview  = wx.webkit.WebKitCtrl(self, -1)
