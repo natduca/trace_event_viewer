@@ -50,7 +50,10 @@ def discover(filters):
             return True
         return False
   
-      base_suite = loader.loadTestsFromModule(module)
+      if hasattr(module, 'suite'):
+        base_suite = module.suite()
+      else:
+        base_suite = loader.loadTestsFromModule(module)
       new_suite = unittest.TestSuite()
       for t in base_suite:
         if isinstance(t, unittest.TestSuite):
