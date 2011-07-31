@@ -54,7 +54,7 @@ def post_delayed_task(cb, delay, *args):
     finally:
       timer.Destroy()
   timer.Bind(wx.EVT_TIMER, on_run, timer)
-  timer.Start(min(1,int(delay * 1000)), True)
+  timer.Start(max(1,int(delay * 1000)), True)
 
 def _on_exception_while_in_main_loop(type, value, tb):
     message = 'Uncaught exception:\n'
@@ -106,6 +106,9 @@ class BrowserWx(wx.Frame,BrowserBase):
 
   def run_javascript(self, script):
     return self._webview.RunScript(script)
+
+  def show(self):
+    self.Show()
 
 """Alias for BrowserWx"""
 Browser = BrowserWx
