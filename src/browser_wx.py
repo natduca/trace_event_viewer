@@ -50,7 +50,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
     cmd = self._debug_ctrl.GetValue()
     self._debug_ctrl.SetValue("")
     res = self.run_javascript(cmd)
-    print "> %s\n%s" % (v, res)
+    print "> %s\n%s" % (cmd, res)
 
   def load_url(self, url):
     self._webview.LoadURL(url)
@@ -58,6 +58,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
   def run_javascript(self, script):
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.
+    script = script.replace('"', '\\"')
     cmd = """(function() { var t = (((function() { try { return eval("%s;"); } catch(ex) { return ex; } })())); if (t === null) return 'null'; if (t === undefined) return 'undefined'; return t.toString(); })()""" % script
     return self._webview.RunScript(cmd)
 
