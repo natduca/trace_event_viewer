@@ -34,7 +34,6 @@ def _run_pending_tasks(e):
     except Exception, ex:
       import traceback
       traceback.print_exc()
-      had_ex = True
 
 def post_task(cb, *args):
   _init_app()
@@ -46,6 +45,19 @@ def post_task(cb, *args):
 
   if not _pending_tasks_timer.IsRunning():
     _pending_tasks_timer.Start(11, True)
+
+def post_delayed_task(cb, delay, *args):
+  _init_app()
+  timer = wx.Timer(None, -1)
+  def on_run(e):
+    try:
+      cb(*args)
+    except Exception, ex:
+      import traceback
+      traceback.print_exc()
+    timer.Destroy()
+  timer.Bind(wx.EVT_TIMER, on_run, timer)
+  timer.Start(min(1,int(delay * 1000)), True)
 
 def run_main_loop():
   global _app

@@ -29,5 +29,12 @@ class BrowserTest(unittest.TestCase):
     browser.post_task(step2)
     browser.run_main_loop()
 
+  def test_delayed_task(self):
+    self.browser.Show()
+    def step2():
+      browser.quit_main_loop()
+    browser.post_delayed_task(step2, 0.1)
+    browser.run_main_loop()
+
   def tearDown(self):
     self.host.close()

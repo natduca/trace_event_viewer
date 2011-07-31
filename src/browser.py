@@ -45,6 +45,9 @@ elif _has_wx:
 def post_task(cb, *args):
   platform_browser.post_task(cb, *args)
 
+def post_delayed_task(cb, delay, *args):
+  platform_browser.post_delayed_task(cb, delay, *args)
+
 def run_main_loop():
   platform_browser.run_main_loop()
 
