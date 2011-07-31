@@ -40,6 +40,8 @@ class FrontendDownload(object):
 
     shim_dir = os.path.join(os.path.dirname(__file__), "../shim")
     for ent in os.listdir(shim_dir):
+      if ent.endswith(".py") or ent.endswith(".pyc") or ent.endswith(".pyo"):
+        continue
       full_ent = os.path.join(shim_dir, ent)
       assert os.path.exists(full_ent)
       self.cp(full_ent, self.data_dir)
