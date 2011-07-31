@@ -15,7 +15,11 @@
 
 # Note, this is untested because to properly test it, I need to rector the
 # GpuInternals code for better unit testing of this interface.
+import os
 import json
+import file_dialogs
+
+
 class TracingController(object):
   def __init__(self, chrome_shim):
     chrome_shim.add_event_listener('beginRequestBufferPercentFull', self.on_begin_request_buffer_percent_full)
@@ -25,7 +29,6 @@ class TracingController(object):
     chrome_shim.add_event_listener('saveTraceFile', self.on_save_trace_file)
     chrome_shim.add_event_listener('on', self.on_load_trace_file)
     self.browser = chrome_shim.browser
-
 
   # recording --- not implemented
   def on_begin_request_buffer_percent_full(self):
@@ -43,9 +46,15 @@ class TracingController(object):
 
   # loading
   def on_load_trace_file(self):
-    print "File loading not implemented yet."
-    # onLoadTraceFileComplete(data)
-    self.browser.run_javascript('tracingController.onLoadTraceFileCanceled()');
+    f = file_dialogs.open_file()
+    if f != None:
+      if not os.path.exists(f):
+        self.browser.run_javascript('tracingController.onLoadTraceFileCanceled()');
+        return
+      d = open(f).read()
+      print self.browser.run_javascript("tracingController.onLoadTraceFileComplete(JSON.parse('%s'))" % d);
+    else:
+      self.browser.run_javascript('tracingController.onLoadTraceFileCanceled()');        
 
   # saving
   def on_save_trace_file(self, data):
