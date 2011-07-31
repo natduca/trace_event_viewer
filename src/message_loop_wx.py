@@ -74,8 +74,8 @@ def run_main_loop():
 
   for w in wx.GetTopLevelWindows():
     w.Destroy()
-  _run_pending_tasks(None)
   _app.Destroy()
+  del _pending_tasks[:]
   if _pending_tasks_timer:
     _pending_tasks_timer.Destroy()
     _pending_tasks_timer = None
