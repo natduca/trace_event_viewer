@@ -31,6 +31,7 @@ DEFAULT_TIMEOUT = 10
 class ClosureJSUnitRunner(unittest.TestCase):
   """This class runs a test built on Google Closure's goog.testing.jsunit"""
   def go(self, test_path, timeout = DEFAULT_TIMEOUT):
+    self._drop_timeout = False
     self.test_path = test_path
     global _dl
     self.host = None
@@ -64,6 +65,9 @@ class ClosureJSUnitRunner(unittest.TestCase):
           message_loop.quit_main_loop()
           return
         else:
+          if browser.debug_mode:
+            self._drop_timeout = True
+            return
           if self.test_path.find('closure_jsunit_runner_test') != -1:
             raise Exception("_noprint Test %s failed" % self.test_path)
           else:
@@ -72,6 +76,8 @@ class ClosureJSUnitRunner(unittest.TestCase):
     message_loop.post_delayed_task(self.on_tick, POLL_RATE)
 
   def on_timeout(self):
+    if self._drop_timeout:
+      return
     if self.test_path.find('closure_jsunit_runner_test') != -1:
       raise Exception("_noprint Test %s timed out" % self.test_path)
     else:
