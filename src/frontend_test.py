@@ -11,17 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-from closure_jsunit_runner import *
-from frontend_daemon import FrontendDaemon
+from closure_jsunit_runner import * 
 
-
-class FrontendDaemonTest_Basic(unittest.TestCase):
-  def test_daemon(self):
-    d = FrontendDaemon("", 12345)
-    d.try_handle_request(0.1)
-    d.shutdown()
-
-class FrontendDaemonTest_JSUnit(ClosureJSUnitRunner):
-  def test_webkit_fixups(self):
-    self.go("frontend_daemon_test.html")
+class FrontendTest(ClosureJSUnitRunner):
+  def test_overlay(self):
+    self.go("gpu_internals/overlay_test.html")

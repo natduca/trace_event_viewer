@@ -13,6 +13,7 @@
 # limitations under the License.
 import logging
 import os
+import re
 import select
 import sys
 import time
@@ -43,7 +44,14 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     rpath = os.path.realpath(os.path.join(os.getcwd(), path[1:]))
     if not rpath.startswith(os.getcwd()) or not os.path.exists(rpath):
-      self.sendError(404)
+      self.send(404)
+      return
+    if rpath.endswith('.html'):
+      data = open(rpath, 'r').read()
+      data2 = re.sub('(\<head.*\>)', """\g<1>
+<script src="/webkit_shim.js"></script>
+<script src="/es5-shim.js"></script>""", data)
+      self.send(200, data2, content_type='text/html')
       return
     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
