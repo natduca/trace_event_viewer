@@ -118,11 +118,11 @@ if __name__ == "__main__":
       import traceback
       if not str(value).startswith("_noprint"):
         traceback.print_exception(exc, value, tb)
-      import src.browser
-      if src.browser.is_main_loop_running():
+      import src.message_loop
+      if src.message_loop.is_main_loop_running():
         if not str(value).startswith("_noprint"):
           print "Untrapped exception! Exiting message loop with exception."
-        src.browser.quit_main_loop(quit_with_exception=True)
+        src.message_loop.quit_main_loop(quit_with_exception=True)
 
     sys.excepthook = hook
 

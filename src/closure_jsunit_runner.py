@@ -14,10 +14,12 @@
 import unittest
 import urllib
 
-import src.browser as browser
+import browser
+import deps
+import message_loop
+
 from src.frontend_download import FrontendDownload
 from src.frontend_daemon_host import FrontendDaemonHost
-import src.deps as deps
 
 __all__ = ["ClosureJSUnitRunner"]
 
@@ -40,9 +42,9 @@ class ClosureJSUnitRunner(unittest.TestCase):
       u = urllib.basejoin(self.host.baseurl, self.test_path)
       self.browser.load_url(u)
       self.browser.show()
-      browser.post_delayed_task(self.on_tick, POLL_RATE)
-      browser.post_delayed_task(self.on_timeout, timeout)
-      browser.run_main_loop()
+      message_loop.post_delayed_task(self.on_tick, POLL_RATE)
+      message_loop.post_delayed_task(self.on_timeout, timeout)
+      message_loop.run_main_loop()
     finally:
       if self.host:
         self.host.close() # prevent host from leaking its daemon
@@ -59,7 +61,7 @@ class ClosureJSUnitRunner(unittest.TestCase):
       if gtest_finished:
         success = self.browser.run_javascript("G_testRunner.isSuccess()") == 'true'
         if success:
-          browser.quit_main_loop()
+          message_loop.quit_main_loop()
           return
         else:
           if self.test_path.find('closure_jsunit_runner_test') != -1:
@@ -67,7 +69,7 @@ class ClosureJSUnitRunner(unittest.TestCase):
           else:
             raise Exception("Test %s failed" % self.test_path)
 
-    browser.post_delayed_task(self.on_tick, POLL_RATE)
+    message_loop.post_delayed_task(self.on_tick, POLL_RATE)
 
   def on_timeout(self):
     if self.test_path.find('closure_jsunit_runner_test') != -1:
