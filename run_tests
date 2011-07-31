@@ -113,6 +113,10 @@ if __name__ == "__main__":
       traceback.print_exception(*args)
       pdb.pm()
     sys.excepthook = hook
+
+    import browser
+    browser.debug = True
+
   else:
     def hook(exc, value, tb):
       import traceback
