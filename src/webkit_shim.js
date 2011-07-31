@@ -20,17 +20,8 @@
 //       non-Chrome WebKits give undefined for non-present elements, but when
 //       you set an attribute to undefined, older WebKits tells you its
 //       undefined. Mert.
+
 _webkit_shim = {
-  /* this mess is to keep wx.webkit from detonating when we run a function that
-     evaluates to something other than a number or string */
-  safeToString: function(obj) {
-    if (obj === undefined)
-      return "undefined";
-    else if (obj === null)
-      return "null";
-    else
-      return obj.toString();
-  }
 };
 
 if (!window["DOMTokenList"]) {

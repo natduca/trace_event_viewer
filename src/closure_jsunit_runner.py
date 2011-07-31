@@ -51,10 +51,8 @@ class ClosureJSUnitRunner(unittest.TestCase):
         self.host.close() # prevent host from leaking its daemon
 
   def on_tick(self):
-    # back anything other than a Number or a String. Undefined and null crash.
-
     # check for gtest existing... BE CAREFUL --- wxpython crashes if it gets
-    gtest_exists = self.browser.run_javascript("(window['G_testRunner'] !== undefined).toString()") == 'true'
+    gtest_exists = self.browser.run_javascript("(window['G_testRunner'] !== undefined)") == 'true'
     if gtest_exists:
       # check for status
       gtest_finished = self.browser.run_javascript("G_testRunner.isFinished()") == 'true'
