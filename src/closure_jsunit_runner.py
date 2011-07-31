@@ -11,15 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-import urllib
-
 import browser
 import deps
 import message_loop
+import unittest
+import urllib
 
-from src.frontend_download import FrontendDownload
-from src.frontend_daemon_host import FrontendDaemonHost
+from frontend_download import FrontendDownload
+from frontend_daemon_host import FrontendDaemonHost
 
 __all__ = ["ClosureJSUnitRunner"]
 
