@@ -29,7 +29,7 @@ def detect_toolkit():
   except ImportError:
     pass
 
-  return is_gtk, is_wx
+  return (False, False)
 
 is_gtk, is_wx = detect_toolkit()
 

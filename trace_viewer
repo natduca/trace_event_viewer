@@ -20,9 +20,10 @@ import re
 import sys
 
 import src.browser as browser
+import src.deps as deps
 from src.frontend_download import FrontendDownload
 from src.frontend_daemon_host import FrontendDaemonHost
-import src.deps as deps
+import src.message_loop as message_loop
 
 def main(args):
   host = None
@@ -33,7 +34,7 @@ def main(args):
     b = browser.Browser()
     b.load_url(host.baseurl)
     b.show()
-    browser.run_main_loop()
+    message_loop.run_main_loop()
   finally:
     if host:
       host.close() # prevent host from leaking its daemon
