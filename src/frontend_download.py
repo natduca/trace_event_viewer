@@ -113,7 +113,7 @@ class FrontendDownload(object):
     return self.system2(cmd)[0]
 
   def system2(self, cmd):
-    if isinstance(cmd,str):
+    if isinstance(cmd,basestring):
       args = shlex.split(cmd)
     else:
       args = cmd
