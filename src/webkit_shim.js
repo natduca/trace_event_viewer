@@ -15,6 +15,12 @@
 // Chrome's codebase is written to expect the most current version
 // of WebKit. Whereas, trace_event is hosted in whatever version of
 // WebKit that PyGtk or WxPython uses. So, we have to fake things out.
+
+// NOTE: don't depend on cr.PropertyKind.ATTR being null vs undefined ...
+//       non-Chrome WebKits give undefined for non-present elements, but when
+//       you set an attribute to undefined, older WebKits tells you its
+//       undefined. Mert.
+
 if (!window["DOMTokenList"]) {
   function _DOMTokenList(parentEl) {
     this.parentEl = parentEl;

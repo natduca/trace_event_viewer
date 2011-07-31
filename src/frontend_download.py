@@ -38,11 +38,13 @@ class FrontendDownload(object):
     self.svn_update(shared_url, rev, self.shared_path)
     self.svn_update(gpu_internals_url, rev, self.gpu_internals_path)
 
-    shim_dir = os.path.join(os.path.dirname(__file__), "../shim")
-    for ent in os.listdir(shim_dir):
+    src_dir = os.path.dirname(__file__)
+    for ent in os.listdir(src_dir):
+      if ent == 'README':
+        continue
       if ent.endswith(".py") or ent.endswith(".pyc") or ent.endswith(".pyo"):
         continue
-      full_ent = os.path.join(shim_dir, ent)
+      full_ent = os.path.join(src_dir, ent)
       assert os.path.exists(full_ent)
       self.cp(full_ent, self.data_dir)
 
