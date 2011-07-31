@@ -43,7 +43,7 @@ class ChromeShim(object):
             for cb in self._event_listeners[send["msg"]]:
               cb(*send["args"])
           else:
-            print "Unrecognized send: %s" % cb
+            print "Unrecognized message from chrome.send: %s" % send["msg"]
     finally:
       message_loop.post_delayed_task(self.on_tick, POLL_INTERVAL)
 

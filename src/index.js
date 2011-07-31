@@ -16,21 +16,19 @@ include("gpu_internals/fast_rect_renderer.js");
 include("gpu_internals/profiling_view.js");
 include("gpu_internals/timeline_view.js");
 
-var browserBridge;
 var tracingController;
-var timelineView; // made global for debugging purposes only
 var profilingView; // made global for debugging purposes only
+var browserBridge = {
+  debugMode: false,
+};
 
 /**
  * Main entry point. called once the page has loaded.
  */
 function onLoad() {
-  browserBridge = new gpu.BrowserBridge();
   tracingController = new gpu.TracingController();
 
   // Create the views.
-  cr.ui.decorate('#info-view', gpu.InfoView);
-
   profilingView = $('profiling-view');
   cr.ui.decorate(profilingView, gpu.ProfilingView);
 
@@ -47,7 +45,7 @@ function onLoad() {
   window.onhashchange = function() {
     var cur = window.location.hash;
     if (cur == '#' || cur == '') {
-      tabs.selectedTab = $('info-view');
+      tabs.selectedTab = $('profiling-view');
     } else {
       var tab = $(window.location.hash.substr(1));
       if (tab)

@@ -21,17 +21,21 @@ import sys
 
 import src.browser as browser
 import src.deps as deps
-from src.frontend_download import FrontendDownload
-from src.frontend_daemon_host import FrontendDaemonHost
+import src.frontend_download as frontend_download
+import src.frontend_daemon_host as frontend_daemon_host
 import src.message_loop as message_loop
+import src.chrome_shim as chrome_shim
+import src.tracing_controller as tracing_controller
 
 def main(args):
   host = None
   try:
     print "Updating frontend code from %s..." % deps.CHROME_SVN_BASE
-    dl = FrontendDownload(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-    host = FrontendDaemonHost(23252, dl.data_dir)
+    dl = frontend_download.FrontendDownload(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
+    host = frontend_daemon_host.FrontendDaemonHost(23252, dl.data_dir)
     b = browser.Browser()
+    shim = chrome_shim.ChromeShim(b)
+    tc = tracing_controller.TracingController(shim)
     b.load_url(host.baseurl)
     b.show()
     message_loop.run_main_loop()
