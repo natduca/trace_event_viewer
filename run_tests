@@ -121,7 +121,7 @@ if __name__ == "__main__":
       import src.browser
       if src.browser.is_main_loop_running():
         if not str(value).startswith("_noprint"):
-          print "Assertion failed! Exiting message loop with exception."
+          print "Untrapped exception! Exiting message loop with exception."
         src.browser.quit_main_loop(quit_with_exception=True)
 
     sys.excepthook = hook
