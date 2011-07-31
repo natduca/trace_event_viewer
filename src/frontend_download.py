@@ -37,6 +37,16 @@ class FrontendDownload(object):
 
     self.svn_update(shared_url, rev, self.shared_path)
     self.svn_update(gpu_internals_url, rev, self.gpu_internals_path)
+
+    shim_dir = os.path.join(os.path.dirname(__file__), "../shim")
+    for ent in os.listdir(shim_dir):
+      full_ent = os.path.join(shim_dir, ent)
+      assert os.path.exists(full_ent)
+      self.cp(full_ent, self.data_dir)
+
+    es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
+    assert os.path.exists(es5shim_dir)
+    self.cp(os.path.join(es5shim_dir, "es5-shim.js"), self.data_dir)
     
   def verify_checkout(self):
     """Makes sure that key files are present."""
@@ -113,10 +123,11 @@ class FrontendDownload(object):
   def path_to(self, subpath):
     return os.path.join(self.data_dir, subpath)
 
-  def rm_rf(self, dirname):
-    if not os.path.exists(dirname):
-      return
-    self.system('rm -rf -- %s' % dirname)
+  def cp(self, src, dst):
+    ret,msg = self.system2('/bin/cp -f %s %s' % (src, self.path_to(dst)))
+    if ret != 0:
+      print msg
+    assert ret == 0
 
   def write1(self, dirname):
     f = open(os.path.join(self.data_dir, dirname), 'w')
@@ -127,3 +138,8 @@ class FrontendDownload(object):
     if not self.persist and os.path.exists(self.data_dir):
       self.rm_rf(self.data_dir)
     self.data_dir = None
+
+  def rm_rf(self, dirname):
+    assert os.path.exists(dirname)
+    self.system('rm -rf -- %s' % dirname)
+
