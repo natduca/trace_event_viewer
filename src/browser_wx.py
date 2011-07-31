@@ -15,15 +15,44 @@ import wx
 import wx.webkit
 import sys
 
-from browser import BrowserBase
+import browser
 
-class BrowserWx(wx.Frame,BrowserBase):
+class BrowserWx(wx.Frame,browser.BrowserBase):
   def __init__(self):
     import message_loop_wx
     message_loop_wx._init_app()
     wx.Frame.__init__(self, None, -1, "TraceViewer")
-    BrowserBase.__init__(self)
+    browser.BrowserBase.__init__(self)
+
     self._webview  = wx.webkit.WebKitCtrl(self, -1)
+    self._debug_ctrl = wx.TextCtrl(self, -1, "")
+    self.Bind(wx.EVT_TEXT_ENTER, self.on_evt_debug_enter, self._debug_ctrl)
+    self.Bind(wx.EVT_CHAR_HOOK, self.on_evt_char)
+
+    outer_sizer = wx.BoxSizer(wx.VERTICAL)
+    outer_sizer.Add(self._webview, 1, wx.ALL | wx.EXPAND)
+    outer_sizer.Add(self._debug_ctrl, 0, wx.ALL | wx.EXPAND | wx.TOP, 8)
+
+    self.SetSizer(outer_sizer)
+
+    if browser.debug_mode:
+      self._debug_ctrl.Show()
+    else:
+      self._debug_ctrl.Hide()
+    
+  def on_evt_char(self, e):
+    if self.FindFocus() == self._debug_ctrl:
+      if e.GetKeyCode() == 13:
+        self.on_evt_debug_enter(e)
+        return
+    e.Skip()
+
+  def on_evt_debug_enter(self, e):
+    v = self._debug_ctrl.GetValue()
+    self._debug_ctrl.SetValue("")
+    cmd = """_webkit_shim.safeToString(((function() { try { return eval("%s;"); } catch(ex) { return ex; } })()))""" % v
+    res = self._webview.RunScript(cmd);
+    print "> %s\n%s" % (v, res)
 
   def load_url(self, url):
     self._webview.LoadURL(url)

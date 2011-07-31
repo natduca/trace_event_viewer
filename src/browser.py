@@ -23,5 +23,7 @@ if message_loop.is_gtk:
 elif message_loop.is_wx:
   import browser_wx as platform_browser
 
+debug_mode = False
+
 def Browser(*args):
   return platform_browser.Browser(*args)
