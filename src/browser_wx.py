@@ -11,16 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import browser
+import message_loop
+import sys
 import wx
 import wx.webkit
-import sys
-
-import browser
 
 class BrowserWx(wx.Frame,browser.BrowserBase):
   def __init__(self):
-    import message_loop_wx
-    message_loop_wx._init_app()
+    message_loop.init_main_loop()
     wx.Frame.__init__(self, None, -1, "TraceViewer",size=browser.default_size)
     browser.BrowserBase.__init__(self)
 

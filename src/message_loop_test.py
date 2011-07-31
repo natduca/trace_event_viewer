@@ -21,8 +21,7 @@ class MessageLoopTest(unittest.TestCase):
     if message_loop.is_wx:
       # need a window to keep the main alive
       import wx
-      import message_loop_wx
-      message_loop_wx._init_app()
+      message_loop.init_main_loop()
       self.wx_frame = wx.Frame(None, -1, "Test");
 
   def test_post_task(self):

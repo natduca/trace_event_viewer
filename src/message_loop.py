@@ -48,6 +48,8 @@ def post_delayed_task(cb, delay, *args):
 def is_main_loop_running():
   return platform_message_loop.is_main_loop_running()
 
+def init_main_loop():
+  platform_message_loop.init_main_loop()
 def run_main_loop():
   platform_message_loop.run_main_loop()
 

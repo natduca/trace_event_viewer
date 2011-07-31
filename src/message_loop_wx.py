@@ -19,7 +19,7 @@ _app = None
 _current_main_loop_instance = 0
 _raise_exception_after_quit = False
 
-def _init_app():
+def init_main_loop():
   global _app
   if not _app:
     _app = wx.App(False)
@@ -34,7 +34,7 @@ def _run_pending_tasks(e):
     cb(*args)
 
 def post_task(cb, *args):
-  _init_app()
+  init_main_loop()
   global _pending_tasks_timer
   if not _pending_tasks_timer:
     _pending_tasks_timer = wx.Timer(None, -1)
@@ -45,7 +45,7 @@ def post_task(cb, *args):
     _pending_tasks_timer.Start(11, True)
 
 def post_delayed_task(cb, delay, *args):
-  _init_app()
+  init_main_loop()
   timer = wx.Timer(None, -1)
   main_loop_instance_at_post = _current_main_loop_instance
   def on_run(e):
@@ -73,7 +73,7 @@ def run_main_loop():
   global _app
   global _current_main_loop_instance
   global _pending_tasks_timer
-  _init_app()
+  init_main_loop()
 
   try:
     _app.MainLoop()
