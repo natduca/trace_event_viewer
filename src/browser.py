@@ -48,11 +48,14 @@ def post_task(cb, *args):
 def post_delayed_task(cb, delay, *args):
   platform_browser.post_delayed_task(cb, delay, *args)
 
+def is_main_loop_running():
+  return platform_browser.is_main_loop_running()
+
 def run_main_loop():
   platform_browser.run_main_loop()
 
-def quit_main_loop():
-  platform_browser.quit_main_loop()
+def quit_main_loop(quit_with_exception=False):
+  platform_browser.quit_main_loop(quit_with_exception)
 
 def Browser(*args):
   if _has_gtk:

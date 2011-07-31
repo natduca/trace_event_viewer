@@ -13,10 +13,13 @@
 # limitations under the License.
 import wx
 import wx.webkit
+import sys
 
 from browser import BrowserBase
 
 _app = None
+_raise_exception_after_quit = False
+
 def _init_app():
   global _app
   if not _app:
@@ -29,11 +32,7 @@ def _run_pending_tasks(e):
   pending = list(_pending_tasks)
   del _pending_tasks[:]
   for cb,args in pending:
-    try:
-      cb(*args)
-    except Exception, ex:
-      import traceback
-      traceback.print_exc()
+    cb(*args)
 
 def post_task(cb, *args):
   _init_app()
@@ -52,18 +51,29 @@ def post_delayed_task(cb, delay, *args):
   def on_run(e):
     try:
       cb(*args)
-    except Exception, ex:
-      import traceback
-      traceback.print_exc()
-    timer.Destroy()
+    finally:
+      timer.Destroy()
   timer.Bind(wx.EVT_TIMER, on_run, timer)
   timer.Start(min(1,int(delay * 1000)), True)
+
+def _on_exception_while_in_main_loop(type, value, tb):
+    message = 'Uncaught exception:\n'
+    message += ''.join(traceback.format_exception(type, value, tb))
+    print message
+    quit_main_loop()
+
+def is_main_loop_running():
+  if not _app:
+    return False
+  return _app.IsMainLoopRunning()
 
 def run_main_loop():
   global _app
   global _pending_tasks_timer
   _init_app()
+
   _app.MainLoop()
+
   for w in wx.GetTopLevelWindows():
     w.Destroy()
   _run_pending_tasks(None)
@@ -73,7 +83,15 @@ def run_main_loop():
     _pending_tasks_timer = None
   _app = None
 
-def quit_main_loop():
+  global _raise_exception_after_quit
+  if _raise_exception_after_quit:
+    _raise_exception_after_quit = False
+    raise Exception("An exception occured while running main loop.")
+
+def quit_main_loop(quit_with_exception):
+  global _raise_exception_after_quit
+  if quit_with_exception:
+    _raise_exception_after_quit = True
   _app.ExitMainLoop()
 
 class BrowserWx(wx.Frame,BrowserBase):
@@ -85,6 +103,9 @@ class BrowserWx(wx.Frame,BrowserBase):
 
   def load_url(self, url):
     self._webview.LoadURL(url)
+
+  def run_javascript(self, script):
+    return self._webview.RunScript(script)
 
 """Alias for BrowserWx"""
 Browser = BrowserWx

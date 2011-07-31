@@ -25,6 +25,7 @@ class BrowserTest(unittest.TestCase):
   def test_browser(self):
     self.browser.Show()
     def step2():
+      self.assertTrue(browser.is_main_loop_running())
       browser.quit_main_loop()
     browser.post_task(step2)
     browser.run_main_loop()
@@ -35,6 +36,29 @@ class BrowserTest(unittest.TestCase):
       browser.quit_main_loop()
     browser.post_delayed_task(step2, 0.1)
     browser.run_main_loop()
+
+  def test_run_javascript(self):
+    self.browser.Show()
+    def step2():
+      ret = self.browser.run_javascript("1 + 1")
+      self.assertEquals("2", ret)
+      browser.quit_main_loop()
+    browser.post_delayed_task(step2, 0.1)
+    browser.run_main_loop()
+
+  def test_exception_stops_test(self):
+    self.browser.Show()
+    def step2():
+      raise Exception, "_noprint expected exception" # _noprint is trapped by run_tests and supresses print
+    browser.post_delayed_task(step2, 0.1)
+    self.assertRaises(Exception, lambda: browser.run_main_loop())
+
+  def test_assert_failing_stops_test(self):
+    self.browser.Show()
+    def step2():
+      self.assertFalse(True,msg="_noprint")
+    browser.post_delayed_task(step2, 0.1)
+    self.assertRaises(Exception, lambda: browser.run_main_loop())
 
   def tearDown(self):
     self.host.close()

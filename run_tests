@@ -110,6 +110,18 @@ if __name__ == "__main__":
       traceback.print_exception(*args)
       pdb.pm()
     sys.excepthook = hook
+  else:
+    def hook(exc, value, tb):
+      import traceback
+      if not str(value).startswith("_noprint"):
+        traceback.print_exception(exc, value, tb)
+      import src.browser
+      if src.browser.is_main_loop_running():
+        if not str(value).startswith("_noprint"):
+          print "Assertion failed! Exiting message loop with exception."
+        src.browser.quit_main_loop(quit_with_exception=True)
+
+    sys.excepthook = hook
 
   # make sure cwd is the base directory!
   os.chdir(os.path.dirname(__file__))
