@@ -16,6 +16,7 @@ import wx.webkit
 import sys
 
 _app = None
+_current_main_loop_instance = 0
 _raise_exception_after_quit = False
 
 def _init_app():
@@ -46,9 +47,12 @@ def post_task(cb, *args):
 def post_delayed_task(cb, delay, *args):
   _init_app()
   timer = wx.Timer(None, -1)
+  main_loop_instance_at_post = _current_main_loop_instance
   def on_run(e):
     try:
-      cb(*args)
+      # timeouts that were enqueued when the mainloop exited should not run
+      if _current_main_loop_instance == main_loop_instance_at_post:
+        cb(*args)
     finally:
       timer.Destroy()
   timer.Bind(wx.EVT_TIMER, on_run, timer)
@@ -67,10 +71,14 @@ def is_main_loop_running():
 
 def run_main_loop():
   global _app
+  global _current_main_loop_instance
   global _pending_tasks_timer
   _init_app()
 
-  _app.MainLoop()
+  try:
+    _app.MainLoop()
+  finally:
+    _current_main_loop_instance += 1
 
   for w in wx.GetTopLevelWindows():
     w.Destroy()
