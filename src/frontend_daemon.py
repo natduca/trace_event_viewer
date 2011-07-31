@@ -50,7 +50,8 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       data = open(rpath, 'r').read()
       data2 = re.sub('(\<head.*\>)', """\g<1>
 <script src="/webkit_shim.js"></script>
-<script src="/es5-shim.js"></script>""", data)
+<script src="/es5-shim.js"></script>
+<script src="/chrome_shim.js"></script>""", data)
       self.send(200, data2, content_type='text/html')
       return
     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)

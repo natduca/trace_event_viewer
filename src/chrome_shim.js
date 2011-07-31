@@ -13,14 +13,31 @@
 // limitations under the License.
 
 if (!window["chrome"]) {
-  window.chrome = {
+  function _ChromeShim() {
+    this._pending_sends = [];
+  }
+
+  _ChromeShim.prototype = {
+
+    __proto__: Object.prototype,
+
     /** Called by gpu_internals/ code to interact with the world
      * outside of javascript. This shim forwards these messages
      * via frontend_daemon.py to chrome_handlers.py
      * @param {string} msg The message being sent to chrome_handlers.
      * @param {Array=} opt_args An array of optional arguments to send to the handler.
      */
-    __send: function(msg, opt_args) {
+    send: function(msg, opt_args) {
+      this._pending_sends.push({msg: msg,
+                                args: opt_args ? opt_args : []});
+    },
+
+    get_pending_sends: function() {
+      ret = JSON.stringify(this._pending_sends);
+      this._pending_sends = []
+      return ret
     }
   };
+
+  window.chrome = new _ChromeShim();
 }
