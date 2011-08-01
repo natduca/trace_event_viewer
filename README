@@ -1,8 +1,27 @@
 trace_event is a standalone version of Chrome's trace_event viewer,
 plus some additional code for collecting data outside of chrome.
 
-It uses WxPython or PyGtk's WebKit control to embed the exact code
-checked into the chromium.org repository.
+It is mostly a webapp, so it runs anywhere you can get a Python version of
+Webkit to work.
+
+The trace files that trace_viewer understands are insanely simple, so it is
+pretty easy to hack up your favorite system to produce them.
+
+
+Dependencies
+===========================================================================
+Linux:
+        python-gtk2
+        python-webkit
+
+OSX, snow leopard:
+        wxPython 2.8-osx-unicode-2.6
+
+OSX, others: untested
+
+
+Trace file format
+===========================================================================
 
 The format for trace files is as follows:
 {
