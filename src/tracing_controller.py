@@ -18,7 +18,7 @@
 import os
 import json
 import file_dialogs
-
+import message_loop
 
 class TracingController(object):
   def __init__(self, chrome_shim):
@@ -28,7 +28,20 @@ class TracingController(object):
     chrome_shim.add_event_listener('loadTraceFile', self.on_load_trace_file)
     chrome_shim.add_event_listener('saveTraceFile', self.on_save_trace_file)
     chrome_shim.add_event_listener('on', self.on_load_trace_file)
+    self.shim = chrome_shim
     self.browser = chrome_shim.browser
+    self._pending_load = None
+
+  def load(self, f):
+    if not os.path.exists(f):
+      raise Exception("%s does not exist" % f)
+
+    def do_load():
+      self._pending_load = f
+      print self.browser.run_javascript("profilingView.onLoad_()")
+
+    # delay loading by 0.25s while the page comes up
+    self.shim.add_pending_command(do_load)
 
   # recording --- not implemented
   def on_begin_request_buffer_percent_full(self):
@@ -46,13 +59,18 @@ class TracingController(object):
 
   # loading
   def on_load_trace_file(self):
-    f = file_dialogs.open_file()
+    if self._pending_load == None:
+      f = file_dialogs.open_file()
+    else:
+      f = self._pending_load
+      self._pending_load = None
+
     if f != None:
       if not os.path.exists(f):
         self.browser.run_javascript('tracingController.onLoadTraceFileCanceled()');
         return
       d = open(f).read()
-      print self.browser.run_javascript("tracingController.onLoadTraceFileComplete(JSON.parse('%s'))" % d);
+      self.browser.run_javascript("tracingController.onLoadTraceFileComplete(JSON.parse('%s'))" % d);
     else:
       self.browser.run_javascript('tracingController.onLoadTraceFileCanceled()');        
 

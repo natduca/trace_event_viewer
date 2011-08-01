@@ -28,6 +28,24 @@ import src.chrome_shim as chrome_shim
 import src.tracing_controller as tracing_controller
 
 def main(args):
+  usage = "Usage: %prog [options] trace_file"
+  parser = optparse.OptionParser(usage=usage)
+  parser.add_option(
+      '-v', '--verbose', action='count', default=0,
+      help='Increase verbosity level (repeat as needed)')
+  (options, args) = parser.parse_args()
+
+  if options.verbose >= 2:
+    logging.basicConfig(level=logging.DEBUG)
+  elif options.verbose:
+    logging.basicConfig(level=logging.INFO)
+  else:
+    logging.basicConfig(level=logging.WARNING)
+
+  if len(args) > 1:
+    print "Can only load one file at a time"
+    return 255
+
   host = None
   try:
     print "Updating frontend code from %s..." % deps.CHROME_SVN_BASE
@@ -38,11 +56,13 @@ def main(args):
     tc = tracing_controller.TracingController(shim)
     b.load_url(host.baseurl)
     b.show()
+    if len(args) == 1:
+      message_loop.post_task(lambda: tc.load(args[0]))
     message_loop.run_main_loop()
   finally:
     if host:
       host.close() # prevent host from leaking its daemon
-  
+  return 0
 
 if __name__ == '__main__':
   os.chdir(os.path.dirname(__file__))
