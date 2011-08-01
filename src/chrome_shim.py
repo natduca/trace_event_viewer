@@ -58,7 +58,7 @@ class ChromeShim(object):
           if send["msg"] == '__chrome_shim_loaded':
             self._loaded = True
             self._run_commands_to_run_when_loaded()
-          if send["msg"] in self._event_listeners:
+          elif send["msg"] in self._event_listeners:
             for cb in self._event_listeners[send["msg"]]:
               cb(*send["args"])
           else:
