@@ -25,7 +25,7 @@ Trace file format
 
 The format for trace files is as follows:
 {
-  "trace_events": [event list]
+  "traceEvents": [event list]
   ... any metadata you want...
 }
 

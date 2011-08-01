@@ -5,54 +5,36 @@ include = function(path) {
   document.write('<script src="' + path + '"></script>');
 }
 include("gpu_internals/overlay.js");
-include("gpu_internals/browser_bridge.js");
-include("gpu_internals/tracing_controller.js");
-include("gpu_internals/info_view.js");
 include("gpu_internals/timeline_model.js");
 include("gpu_internals/sorted_array_utils.js");
 include("gpu_internals/timeline.js");
 include("gpu_internals/timeline_track.js");
 include("gpu_internals/fast_rect_renderer.js");
-include("gpu_internals/profiling_view.js");
 include("gpu_internals/timeline_view.js");
 
-var tracingController;
-var profilingView; // made global for debugging purposes only
-var browserBridge = {
-  debugMode: false,
-};
+var timelineView;
 
-/**
- * Main entry point. called once the page has loaded.
- */
-function onLoad() {
-  tracingController = new gpu.TracingController();
-
-  // Create the views.
-  profilingView = $('profiling-view');
-  cr.ui.decorate(profilingView, gpu.ProfilingView);
-
-  // Create the main tab control
-  var tabs = $('main-tabs');
-  cr.ui.decorate(tabs, cr.ui.TabBox);
-
-  // Sync the main-tabs selectedTabs in-sync with the location.
-  tabs.addEventListener('selectedChange', function() {
-    if (tabs.selectedTab.id) {
-      history.pushState('', '', '#' + tabs.selectedTab.id);
-    }
-  });
-  window.onhashchange = function() {
-    var cur = window.location.hash;
-    if (cur == '#' || cur == '') {
-      tabs.selectedTab = $('profiling-view');
-    } else {
-      var tab = $(window.location.hash.substr(1));
-      if (tab)
-        tabs.selectedTab = tab;
-    }
-  };
-  window.onhashchange();
+function onDOMContentLoaded() {
+  timelineView = $('timeline-view');
+  cr.ui.decorate(timelineView, gpu.TimelineView);
+  chrome.send('ready')
 }
 
-document.addEventListener('DOMContentLoaded', onLoad);
+function loadTrace(trace) {
+  if (timelineView == undefined)
+    throw Error('timelineview is null');
+  
+  // some old traces were just arrays without an outer object
+  if (!trace.traceEvents) {
+    if (trace instanceof Array)
+      timelineView.traceEvents = trace;
+    else
+      throw Error('trace does not have an events array');
+  } else {
+    timelineView.traceEvents = trace.traceEvents;
+  }
+  return true;
+}
+
+
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
