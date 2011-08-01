@@ -17,8 +17,28 @@ import message_loop
 def open_file():
   message_loop.init_main_loop()
   if message_loop.is_gtk:
-    raise Exception("not implemented")
-  else:
+    import gtk
+    dlg = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+    flt = gtk.FileFilter()
+    flt.set_name("JSON files")
+    flt.add_pattern("*.json");
+    dlg.add_filter(flt)
+
+    flt = gtk.FileFilter()
+    flt.set_name("All files")
+    flt.add_pattern("*.*");
+    dlg.add_filter(flt)
+
+    resp = dlg.run()
+    if resp == gtk.RESPONSE_CANCEL:
+      dlg.destroy()
+      return None
+    f = dlg.get_filename()
+    dlg.destroy()
+    return f
+
+  elif message_loop.is_wx:
     import wx
     wc = "JSON files (*.json)|*.json|All files (*.*)|*.*"
     fd = wx.FileDialog(None, "Open trace file...", style=wx.FD_OPEN, wildcard=wc)
@@ -26,3 +46,5 @@ def open_file():
     if res != wx.ID_OK:
       return None
     return fd.GetPath()
+  else:
+    raise Exception("Not implemented.")
