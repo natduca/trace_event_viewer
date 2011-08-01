@@ -39,6 +39,7 @@ class ChromeShimTest(unittest.TestCase):
       self.browser.load_url(u)
       self.browser.show()
       self.shim = chrome_shim.ChromeShim(self.browser)
+      self.shim.add_command_when_loaded(self.on_loaded)
       self.shim.add_event_listener('foo1', self.on_foo1)
       self.shim.add_event_listener('foo2', self.on_foo2)
       message_loop.post_delayed_task(self.on_timeout, DEFAULT_TIMEOUT)
@@ -52,7 +53,11 @@ class ChromeShimTest(unittest.TestCase):
 
   def on_foo2(self, arg):
     self.assertEquals('bar', arg)
+    self.got_foo2 = True
+
+  def on_loaded(self):
     self.assertTrue(self.got_foo1)
+    self.assertTrue(self.got_foo2)
     message_loop.quit_main_loop()
 
   def on_timeout(self):

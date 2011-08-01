@@ -15,6 +15,9 @@
 if (!window["chrome"]) {
   function _ChromeShim() {
     this._pending_sends = [];
+    document.addEventListener('DOMContentLoaded', function() {
+            this.send('__chrome_shim_loaded');
+        }.bind(this));
   }
 
   _ChromeShim.prototype = {

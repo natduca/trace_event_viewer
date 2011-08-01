@@ -22,19 +22,21 @@ class ChromeShim(object):
     self.browser = browser
     message_loop.post_delayed_task(self.on_tick, POLL_INTERVAL)
     self._event_listeners = dict()
-    self._shim_exists = False
-    self._pending_commands = []
+    self._loaded = False
+    self._commands_to_run_when_loaded = []
 
-  def add_pending_command(self, cb, *args):
+  def add_command_when_loaded(self, cb, *args):
     """Adds a command to run when the shim is active."""
-    if self._shim_exists:
+    if self._loaded:
       cb(*args)
+      return
     def do_it():
       cb(*args)
-    self._pending_commands.append(do_it)
+    self._commands_to_run_when_loaded.append(do_it)
 
-  def _run_pending_commands(self):
-    for cb in self._pending_commands:
+  def _run_commands_to_run_when_loaded(self):
+    self._loaded = False
+    for cb in self._commands_to_run_when_loaded:
       cb()
 
   def add_event_listener(self, handler, cb, *args):
@@ -49,20 +51,18 @@ class ChromeShim(object):
       # check for chrome_shim existing
       chrome_shim_exists = self.browser.run_javascript("(window['chrome'] !== undefined)") == 'true'
       if chrome_shim_exists:
-        if self._shim_exists == False:
-          self._run_pending_commands()
-        self._shim_exists = True
         # check for sends
         sends = self.browser.run_javascript("chrome.get_pending_sends()")
         sends = json.loads(sends)
         for send in sends:
+          if send["msg"] == '__chrome_shim_loaded':
+            self._loaded = True
+            self._run_commands_to_run_when_loaded()
           if send["msg"] in self._event_listeners:
             for cb in self._event_listeners[send["msg"]]:
               cb(*send["args"])
           else:
             print "Unrecognized message from chrome.send: %s" % send["msg"]
-      else:
-        self._shim_exists = False
     finally:
       message_loop.post_delayed_task(self.on_tick, POLL_INTERVAL)
 

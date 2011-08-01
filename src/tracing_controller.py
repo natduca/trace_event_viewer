@@ -40,14 +40,13 @@ class TracingController(object):
       self._pending_load = f
       print self.browser.run_javascript("profilingView.onLoad_()")
 
-    # delay loading by 0.25s while the page comes up
-    self.shim.add_pending_command(do_load)
+    # don't load until the shim is up
+    self.shim.add_command_when_loaded(do_load)
 
   # recording --- not implemented
   def on_begin_request_buffer_percent_full(self):
     self.browser.run_javascript('tracingController.onRequestBufferPercentFullComplete(0)');
 
-  
   def on_begin_tracing(self):
     self.browser.run_javascript('tracingController.onEndTracingComplete()');
 
@@ -55,7 +54,6 @@ class TracingController(object):
     # self.browser.run_javascript('tracingController.onTraceDataCollected(events)');
     # self.browser.run_javascript('tracingController.onEndTracingComplete()');
     pass
-  
 
   # loading
   def on_load_trace_file(self):
