@@ -7,6 +7,13 @@ Webkit to work.
 The trace files that trace_viewer understands are insanely simple, so it is
 pretty easy to hack up your favorite system to produce them.
 
+QuickStart
+===========================================================================
+./trace_viewer trace_event/data/big_trace.json
+    w/a/s/d to move around the UI
+
+Now, make your favorite language generate trace files, according to
+the mini-spec written below!
 
 Dependencies
 ===========================================================================
@@ -14,11 +21,12 @@ Linux:
         python-gtk2
         python-webkit
 
-OSX, snow leopard:
+OSX:
+        http://www.wxpython.org/download.php#stable
         wxPython 2.8-osx-unicode-2.6
 
-OSX, others: untested
-
+Windows: Should be possible, but I've got to remove dependencies on
+         SVN and things like 'rm' and 'cp'
 
 Trace file format
 ===========================================================================
