@@ -34,17 +34,16 @@ class ChromeShim(object):
     self._pending_commands.append(do_it)
 
   def _run_pending_commands(self):
-    print "runnign pending"
     for cb in self._pending_commands:
       cb()
-    
+
   def add_event_listener(self, handler, cb, *args):
     def call_cb(*args):
       cb(*args)
     if handler not in self._event_listeners:
       self._event_listeners[handler] = []
     self._event_listeners[handler].append(call_cb)
-    
+
   def on_tick(self):
     try:
       # check for chrome_shim existing
