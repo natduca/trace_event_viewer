@@ -29,7 +29,13 @@ class FrontendDownload(object):
     if not persist:
       if os.path.exists(self.data_dir):
         self.rm_rf(self.data_dir)
-    
+
+    es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
+    if not os.path.exists(es5shim_dir):
+      raise Exception("ES5 shim missing. You probably forgot to do git submodule update --init")
+    if not os.path.exists(os.path.join(es5shim_dir, 'es5-shim.js')):
+      raise Exception("third_party/es5-shim/es5-shim.js is missing. Is that submodule messed up?")
+
     shared_url = self.url_to('chrome/browser/resources/shared/')
     self.shared_path = self.path_to('shared')
     gpu_internals_url = self.url_to('chrome/browser/resources/gpu_internals/')
@@ -48,8 +54,6 @@ class FrontendDownload(object):
       assert os.path.exists(full_ent)
       self.cp(full_ent, self.data_dir)
 
-    es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
-    assert os.path.exists(es5shim_dir)
     self.cp(os.path.join(es5shim_dir, "es5-shim.js"), self.data_dir)
     
   def verify_checkout(self):
@@ -144,6 +148,7 @@ class FrontendDownload(object):
     self.data_dir = None
 
   def rm_rf(self, dirname):
-    assert os.path.exists(dirname)
+    if not os.path.exists(dirname):
+      return
     self.system('rm -rf -- %s' % dirname)
 
