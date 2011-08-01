@@ -48,6 +48,22 @@ class BrowserTest(unittest.TestCase):
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
 
+  def test_run_javascript_twice_with_same_result(self):
+    """
+    The gtk backend needs to do some magic to get return values.
+    Asking for something with the same return value string is fragile.
+    So, test that its working.
+    """
+    self.browser.show()
+    def step2():
+      ret = self.browser.run_javascript("1 + 2")
+      self.assertEquals("3", ret)
+      ret = self.browser.run_javascript("2 + 1")
+      self.assertEquals("3", ret)
+      message_loop.quit_main_loop()
+    message_loop.post_delayed_task(step2, 0.1)
+    message_loop.run_main_loop()
+
   def test_run_javascript_that_results_in_json(self):
     """
     Make sure that the run_javascript method can handle complex inputs and outputs.
@@ -56,6 +72,25 @@ class BrowserTest(unittest.TestCase):
     def step2():
       ret = self.browser.run_javascript("""JSON.stringify({a: 3, b: 'foo', c: "bar"})""")
       self.assertEquals('{"a":3,"b":"foo","c":"bar"}', ret);
+      message_loop.quit_main_loop()
+    message_loop.post_delayed_task(step2, 0.1)
+    message_loop.run_main_loop()
+
+  def test_run_javascript_that_throws(self):
+    self.browser.show()
+    def step2():
+      ret = self.browser.run_javascript("""throw Error('Foo');""")
+      # ret is pretty implmenetation specific, so best to just ensure it returns
+      # todo, make the run_javascript throw ^_^
+      message_loop.quit_main_loop()
+    message_loop.post_delayed_task(step2, 0.1)
+    message_loop.run_main_loop()
+
+  def test_run_javascript_that_wont_parse(self):
+    self.browser.show()
+    def step2():
+      ret = self.browser.run_javascript("""'""")
+      # ret is pretty implmenetation specific, so best to just ensure it returns
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
