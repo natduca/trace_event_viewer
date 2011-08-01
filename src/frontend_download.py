@@ -76,7 +76,7 @@ class FrontendDownload(object):
       if os.path.exists(dest) and os.path.isdir(dest):
         os.chdir(dest)
         if self.svn_getrev(dest) == rev:
-          logging.debug('copy of %s is up-to-date')
+          logging.debug('copy of %s is up-to-date' % url)
           return
         logging.debug('updating copy of %s to %s' % (url, rev))
         ret,msg = self.system2(['svn', 'update', '-r', str(rev)])
