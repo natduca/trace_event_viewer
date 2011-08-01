@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import browser
+import logging
 import message_loop
 import sys
 import gtk
@@ -38,6 +39,7 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     self._title = None
     self._title_version = 0
     self._webview.connect('title-changed', self.on_title_changed)
+    self._webview.connect('console-message', self.on_console_message)
 
     self.add(self._webview)
 
@@ -48,15 +50,22 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.
     script = script.replace('"', '\\"')
-    cmd = """document.title = (function() { var t = (((function() { try { return eval("%s;"); } catch(ex) { return ex; } })())); if (t === null) return 'null'; if (t === undefined) return 'undefined'; return t.toString(); })();""" % script
+    # reset the title first, then run the script inside an eval, inside a catch, inside a function.
+    cmd = """document.title = 'asdfasdfasdfasdfasdf'; document.title = (function() { var t = (((function() { try { return eval("%s;"); } catch(ex) { return ex; } })())); if (t === null) return 'null'; if (t === undefined) return 'undefined'; return t.toString(); })();""" % script
     prev_title_version = self._title_version
-    self._webview.execute_script(cmd)
-    assert self._title_version == prev_title_version + 1
+    self._webview.execute_script(cmd) # this will change the title twice
+    if self._title_version != prev_title_version + 2:
+      logging.warn('run_javascript failed for %s', script)
+      return None
     return self._title
 
   def on_title_changed(self, widget, frame, title):
     self._title = title
     self._title_version += 1
+
+  def on_console_message(self, a, b, c, d):
+    logging.debug("console: %s %s %s %s" % (a, b, c, d))
+    return True
 
   def show(self):
     gtk.Window.show(self)
