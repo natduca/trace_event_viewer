@@ -48,6 +48,18 @@ class BrowserTest(unittest.TestCase):
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
 
+  def test_run_javascript_that_results_in_json(self):
+    """
+    Make sure that the run_javascript method can handle complex inputs and outputs.
+    """
+    self.browser.show()
+    def step2():
+      ret = self.browser.run_javascript("""JSON.stringify({a: 3, b: 'foo', c: "bar"})""")
+      self.assertEquals('{"a":3,"b":"foo","c":"bar"}', ret);
+      message_loop.quit_main_loop()
+    message_loop.post_delayed_task(step2, 0.1)
+    message_loop.run_main_loop()
+
   def test_exception_stops_test(self):
     self.browser.show()
     def step2():
