@@ -53,7 +53,11 @@ class ChromeShim(object):
       if chrome_shim_exists:
         # check for sends
         sends = self.browser.run_javascript("chrome.get_pending_sends()")
-        sends = json.loads(sends)
+        try:
+          sends = json.loads(sends)
+        except ValueError:
+          sends = []
+
         for send in sends:
           if send["msg"] == '__chrome_shim_loaded':
             self._loaded = True
@@ -65,4 +69,3 @@ class ChromeShim(object):
             print "Unrecognized message from chrome.send: %s" % send["msg"]
     finally:
       message_loop.post_delayed_task(self.on_tick, POLL_INTERVAL)
-
