@@ -84,10 +84,11 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     if (self.flags() & gtk.REALIZED) == 0:
       message_loop.post_delayed_task(self.load_url, 0.5, url)
     else:
+      logging.debug("Load begin of %s" % url);
       self._webview.load_uri(url)
 
   def on_load_finished(self, *args):
-    print "load finished"
+    logging.debug("Load finished");
     self._loaded = True
 
   def run_javascript(self, script):
