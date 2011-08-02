@@ -62,16 +62,20 @@ def run_main_loop():
     _is_main_loop_running = False
     _current_main_loop_instance += 1
 
-  for w in gtk.window_list_toplevels():
-    w.destroy()
-
   global _raise_exception_after_quit
   if _raise_exception_after_quit:
     _raise_exception_after_quit = False
     raise Exception("An exception occured while running main loop.")
 
+
 def quit_main_loop(quit_with_exception):
   global _raise_exception_after_quit
   if quit_with_exception:
     _raise_exception_after_quit = True
-  gtk.main_quit()
+  def do_cleanup():
+    for w in gtk.window_list_toplevels():
+      w.destroy()
+    post_task(do_quit)
+  def do_quit():
+    gtk.main_quit()
+  post_task(do_cleanup)
