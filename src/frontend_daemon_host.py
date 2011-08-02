@@ -15,6 +15,7 @@ import httplib
 import json
 import logging
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -51,7 +52,7 @@ class FrontendDaemonHost(object):
     if is_port_listening(port):
       raise Exception("Daemon running")
     self._port = port
-    
+
     self._daemon_proc = subprocess.Popen([
         sys.executable, "-m", "src.frontend_daemon", str(port), basedir])
     try:
@@ -85,7 +86,7 @@ class FrontendDaemonHost(object):
       raise Exception("Daemon did not come up")
 
     self._conn = None
-    self._db_proxy = None    
+    self._db_proxy = None
 
   def close(self):
     try:
@@ -108,7 +109,9 @@ class FrontendDaemonHost(object):
 
   @property
   def host(self):
-    return 'localhost'
+    # Report as an IP address because on older webkit builds that use soup, localhost
+    # does not work as a URL.
+    return socket.gethostbyname('localhost')
 
   @property
   def port(self):
@@ -116,8 +119,7 @@ class FrontendDaemonHost(object):
 
   @property
   def baseurl(self):
-    return 'http://localhost:%i' % self._port
+    return 'http://%s:%i' % (self.host, self._port)
 
   def urlread(self, path):
     return urllib2.urlopen(urllib.basejoin(self.baseurl, path)).read()
-
