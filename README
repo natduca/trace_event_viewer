@@ -9,6 +9,9 @@ pretty easy to hack up your favorite system to produce them.
 
 QuickStart
 ===========================================================================
+
+*** Make sure to git submodule update --init after cloning ***
+
 ./trace_viewer trace_event/data/big_trace.json
     w/a/s/d to move around the UI
 
