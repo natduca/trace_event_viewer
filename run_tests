@@ -49,7 +49,7 @@ def discover(filters):
           if re.search(f,name):
             return True
         return False
-  
+
       if hasattr(module, 'suite'):
         base_suite = module.suite()
       else:
