@@ -32,6 +32,7 @@ def main(args):
   parser.add_option(
       '-v', '--verbose', action='count', default=0,
       help='Increase verbosity level (repeat as needed)')
+  parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
   (options, args) = parser.parse_args()
 
   if options.verbose >= 2:
@@ -40,6 +41,9 @@ def main(args):
     logging.basicConfig(level=logging.INFO)
   else:
     logging.basicConfig(level=logging.WARNING)
+
+  if options.debug:
+    browser.debug_mode = True
 
   if len(args) > 1:
     print "Can only load one file at a time"
@@ -59,6 +63,7 @@ def main(args):
     b.show()
     if len(args) == 1:
       def do_load():
+
         res = b.run_javascript("loadTrace(JSON.parse('%s'))" % trace_data);
         if res != 'true':
           raise Exception('LoadTrace failed with %s', res)

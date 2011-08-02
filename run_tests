@@ -117,7 +117,7 @@ def main():
     sys.excepthook = hook
 
     import browser
-    browser.debug = True
+    browser.debug_mode = True
 
   else:
     def hook(exc, value, tb):
