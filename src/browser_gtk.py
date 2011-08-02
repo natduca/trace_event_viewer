@@ -25,8 +25,16 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     browser.BrowserBase.__init__(self)
 
     self.set_size_request(browser.default_size[0], browser.default_size[1])
+
+    vbox = gtk.VBox()
+    vbox.show()
     self._webview  = webkit.WebView()
     self._webview.show()
+
+    self._debug_ctrl = gtk.Entry()
+    self._debug_ctrl.connect('key_press_event', self._on_debug_keypress)
+    if browser.debug_mode:
+      self._debug_ctrl.show()
 
     # OK, this bit of magic is because the gtk webkit's execute_script
     # method does not actually return the script value. But, calling execute_script
@@ -38,15 +46,55 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     # insulation in case the page itself changes the title.
     self._title = None
     self._title_version = 0
-    self._webview.connect('title-changed', self.on_title_changed)
-    self._webview.connect('console-message', self.on_console_message)
+    self._webview_connected_signals = [
+        self._webview.connect('title-changed', self.on_title_changed),
+        self._webview.connect('console-message', self.on_console_message),
+        self._webview.connect('load-finished', self.on_load_finished),
+        ]
+    self._loaded = False
 
-    self.add(self._webview)
+    vbox.pack_start(self._webview, True, True)
+    vbox.pack_start(self._debug_ctrl, False, True)
+    self.add(vbox)
+
+
+  def _on_debug_keypress(self, entry, event):
+    keyname = gtk.gdk.keyval_name(event.keyval)
+    if keyname == 'Return':
+      cmd = self._debug_ctrl.get_text()
+      self._debug_ctrl.set_text("")
+      if cmd.startswith("*"):
+        try:
+          res = eval(cmd[1:],None,{
+              "v": self._webview,
+              "w": self,
+              "message_loop": message_loop
+              })
+        except:
+          import traceback
+          res = traceback.format_exc()
+        print "PY> %s\n%s" % (cmd, res)
+
+      else:
+        res = self.run_javascript(cmd)
+        print "> %s\n%s" % (cmd, res)
+
 
   def load_url(self, url):
-    self._webview.load_uri(url)
+    if (self.flags() & gtk.REALIZED) == 0:
+      message_loop.post_delayed_task(self.load_url, 0.5, url)
+    else:
+      self._webview.load_uri(url)
+
+  def on_load_finished(self, *args):
+    print "load finished"
+    self._loaded = True
 
   def run_javascript(self, script):
+    if self._loaded == False:
+      return None
+    if (self.flags() & gtk.REALIZED) == 0:
+      return None
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.
     script = script.replace('"', '\\"')
@@ -66,6 +114,13 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
   def on_console_message(self, a, b, c, d):
     logging.debug("console: %s %s %s %s" % (a, b, c, d))
     return True
+
+  def destroy(self):
+    for i in self._webview_connected_signals:
+      self._webview.disconnect(i)
+    self.remove(self._webview)
+    self._webview.destroy()
+    gtk.Window.destroy(self)
 
   def show(self):
     gtk.Window.show(self)
