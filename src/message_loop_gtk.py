@@ -74,7 +74,7 @@ def quit_main_loop(quit_with_exception):
     _raise_exception_after_quit = True
   def do_cleanup():
     for w in gtk.window_list_toplevels():
-      w.destroy()
+      w.hide()
     post_task(do_quit)
   def do_quit():
     gtk.main_quit()
