@@ -119,7 +119,7 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
   def destroy(self):
     for i in self._webview_connected_signals:
       self._webview.disconnect(i)
-    self.remove(self._webview)
+    self._webview.get_parent().remove(self._webview)
     self._webview.destroy()
     gtk.Window.destroy(self)
 
