@@ -16,6 +16,7 @@ import os
 import shlex
 import subprocess
 import unittest
+import frontend_resources
 from frontend_daemon_host import FrontendDaemonHost
 
 class FrontendDaemonHostTest(unittest.TestCase):
@@ -50,7 +51,7 @@ class FrontendDaemonHostTest(unittest.TestCase):
       self.rm_rf(self.test_data_dir)
     os.makedirs(self.test_data_dir)
     self.write1('index.html')
-    self.host = FrontendDaemonHost(12345, self.test_data_dir)
+    self.host = FrontendDaemonHost(12345, {"/" : self.test_data_dir})
 
   def test_host(self):
     x = self.host.urlread("/index.html")

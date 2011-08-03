@@ -11,8 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from closure_jsunit_runner import *
+import chrome_svn_checkout
+import deps
+import unittest
 
-class FrontendTest(ClosureJSUnitRunner):
-  def test_overlay(self):
-    self.go("/chrome/gpu_internals/overlay_test.html")
+from frontend_resources import FrontendResources
+
+class FrontendResourcesTest(unittest.TestCase):
+  def test_fe_with_dir(self):
+    chrome_checkout = chrome_svn_checkout.ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
+    self.fe = FrontendResources(chrome_checkout.data_dir)
+    assert len(self.fe.dir_mappings) != 0
+
+  def test_fe_with_checkout(self):
+    self.fe = FrontendResources()
+    assert len(self.fe.dir_mappings) != 0
+
+  def cleanUp(self):
+    if self.fe:
+      self.fe.close()

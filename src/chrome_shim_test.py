@@ -14,12 +14,11 @@
 import browser
 import chrome_shim
 import deps
+import frontend_resources
+import frontend_daemon_host
 import message_loop
 import unittest
 import urllib
-
-from frontend_download import FrontendDownload
-from frontend_daemon_host import FrontendDaemonHost
 
 DEFAULT_TIMEOUT = 10
 
@@ -29,11 +28,11 @@ class ChromeShimTest(unittest.TestCase):
   and makes sure we receive sends from it
   """
   def test_shim(self):
-    self.test_path = "/chrome_shim_test.html";
+    self.test_path = "/src/chrome_shim_test.html";
     self.host = None
     try:
-      dl = FrontendDownload(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-      self.host = FrontendDaemonHost(23252, dl.data_dir)
+      fer = frontend_resources.FrontendResources()
+      self.host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
       self.browser = browser.Browser()
       u = urllib.basejoin(self.host.baseurl, self.test_path)
       self.browser.load_url(u)
@@ -66,4 +65,3 @@ class ChromeShimTest(unittest.TestCase):
   def cleanUp(self):
     if self.host:
       self.host.close() # prevent host from leaking its daemon
-

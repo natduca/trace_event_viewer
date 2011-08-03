@@ -13,28 +13,25 @@
 # limitations under the License.
 import os
 import logging
-import tempfile
 import re
 import shlex
 import subprocess
+import sys
 import urllib
 
-
-class FrontendDownload(object):
+class ChromeSVNCheckout(object):
   def __init__(self, base_url, rev, persist = True):
     self.persist = persist
     self.base_url = base_url
     # create a directory hierarchy to do tests in
-    self.data_dir = os.path.realpath(os.path.join(tempfile.gettempdir(), 'trace_event_frontend'))
+    trace_dir = os.path.abspath(os.path.join(os.path.dirname(sys.modules[__name__].__file__), '..'))
+    assert os.path.exists(trace_dir)
+
+    third_party_dir = os.path.join(trace_dir, 'third_party')
+    self.data_dir = os.path.join(third_party_dir, 'chrome')
     if not persist:
       if os.path.exists(self.data_dir):
         self.rm_rf(self.data_dir)
-
-    es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
-    if not os.path.exists(es5shim_dir):
-      raise Exception("ES5 shim missing. You probably forgot to do git submodule update --init")
-    if not os.path.exists(os.path.join(es5shim_dir, 'es5-shim.js')):
-      raise Exception("third_party/es5-shim/es5-shim.js is missing. Is that submodule messed up?")
 
     shared_url = self.url_to('chrome/browser/resources/shared/')
     self.shared_path = self.path_to('shared')
@@ -44,18 +41,10 @@ class FrontendDownload(object):
     self.svn_update(shared_url, rev, self.shared_path)
     self.svn_update(gpu_internals_url, rev, self.gpu_internals_path)
 
-    src_dir = os.path.dirname(__file__)
-    for ent in os.listdir(src_dir):
-      if ent == 'README':
-        continue
-      if ent.endswith(".py") or ent.endswith(".pyc") or ent.endswith(".pyo"):
-        continue
-      full_ent = os.path.join(src_dir, ent)
-      assert os.path.exists(full_ent)
-      self.cp(full_ent, self.data_dir)
+    ok,err = self.verify_checkout()
+    if not ok:
+      raise Exception, err
 
-    self.cp(os.path.join(es5shim_dir, "es5-shim.js"), self.data_dir)
-    
   def verify_checkout(self):
     """Makes sure that key files are present."""
     required = [
@@ -131,17 +120,6 @@ class FrontendDownload(object):
   def path_to(self, subpath):
     return os.path.join(self.data_dir, subpath)
 
-  def cp(self, src, dst):
-    ret,msg = self.system2('/bin/cp -f %s %s' % (src, self.path_to(dst)))
-    if ret != 0:
-      print msg
-    assert ret == 0
-
-  def write1(self, dirname):
-    f = open(os.path.join(self.data_dir, dirname), 'w')
-    f.write('1\n')
-    f.close()
-
   def close(self):
     if not self.persist and os.path.exists(self.data_dir):
       self.rm_rf(self.data_dir)
@@ -151,4 +129,3 @@ class FrontendDownload(object):
     if not os.path.exists(dirname):
       return
     self.system('rm -rf -- %s' % dirname)
-

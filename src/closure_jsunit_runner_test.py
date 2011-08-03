@@ -15,13 +15,13 @@ from closure_jsunit_runner import *
 
 class ClosureJSUnitTestRunnerTest(ClosureJSUnitRunner):
   def test_timeout_successfully(self):
-    self.assertRaises(Exception, lambda: self.go("closure_jsunit_runner_test_timeout.html",timeout=0.5))
+    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test_timeout.html",timeout=0.5))
 
   def test_fails_successfully(self):
-    self.assertRaises(Exception, lambda: self.go("closure_jsunit_runner_test.html?runTests=test_that_fails"))
+    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_fails"))
 
   def test_raise_throws(self):
-    self.assertRaises(Exception, lambda: self.go("closure_jsunit_runner_test.html?runTests=test_that_throws"))
+    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_throws"))
 
   def test_succeeds_successfully(self):
-    self.go("closure_jsunit_runner_test.html?runTests=test_that_succeeds")
+    self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_succeeds")

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import frontend_resources
 import httplib
 import json
 import logging
@@ -33,7 +34,7 @@ def is_port_listening(port):
   return True
 
 class FrontendDaemonHost(object):
-  def __init__(self, port, basedir):
+  def __init__(self, port, resources):
     # If a daemon is running, try killing it via /kill
     if is_port_listening(port):
       for i in range(2):
@@ -53,8 +54,11 @@ class FrontendDaemonHost(object):
       raise Exception("Daemon running")
     self._port = port
 
-    self._daemon_proc = subprocess.Popen([
-        sys.executable, "-m", "src.frontend_daemon", str(port), basedir])
+    args = [sys.executable, "-m", "src.frontend_daemon", str(port)]
+    for p,d in resources.items():
+      args.append(p)
+      args.append(d)
+    self._daemon_proc = subprocess.Popen(args)
     try:
       self._wait_for_daemon_start()
     except Exception, ex:

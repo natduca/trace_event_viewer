@@ -42,19 +42,30 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       self.send(200, "OK")
       return
 
-    rpath = os.path.realpath(os.path.join(os.getcwd(), path[1:]))
-    if not rpath.startswith(os.getcwd()) or not os.path.exists(rpath):
+    resolved = self.server.resolve_path(path)
+    if not resolved:
       self.send(404)
       return
-    if rpath.endswith('.html'):
-      data = open(rpath, 'r').read()
-      data2 = re.sub('(\<head.*\>)', """\g<1>
-<script src="/webkit_shim.js"></script>
-<script src="/es5-shim.js"></script>
-<script src="/chrome_shim.js"></script>""", data)
-      self.send(200, data2, content_type='text/html')
+    if not os.path.exists(resolved):
+      self.send(404)
       return
-    SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+
+    split = os.path.splitext(resolved)
+    if split[1] in SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map:
+      mimetype = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map[split[1]]
+    else:
+      mimetype = "text/plain"
+
+    if split[1].lower() == '.html':
+      data = open(resolved, 'r').read()
+      data2 = re.sub('(\<head.*\>)', """\g<1>
+<script src="/src/webkit_shim.js"></script>
+<script src="/es5-shim/es5-shim.js"></script>
+<script src="/src/chrome_shim.js"></script>""", data)
+      self.send(200, data2, mimetype)
+    else:
+      data = open(resolved, 'r').read()
+      self.send(200, data, mimetype)
 
   def log_message(self, format, *args):
     logging.debug(format, args)
@@ -71,17 +82,46 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       pass
 
 class FrontendDaemon(BaseHTTPServer.HTTPServer):
-  def __init__(self, host, port):
+  def __init__(self, host, port, mapped_dirs):
     BaseHTTPServer.HTTPServer.__init__(self, (host, port), _RequestHandler)
-    self.port_ = port
+    self._port = port
+    self._mapped_dirs = dict()
+    self._root_mappath = None
+    for p,d in mapped_dirs.items():
+      if p == "/":
+        self._root_mappath = os.path.realpath(d)
+      else:
+        self._mapped_dirs[p] = os.path.realpath(d)
+
+  def resolve_path(self, path):
+    if path[0] != '/':
+      return None
+
+    for mapbase,mapto in self._mapped_dirs.items():
+      if path.find(mapbase) != 0:
+        continue
+      subpath = path[len(mapbase):]
+      if subpath[0] != '/':
+        continue
+      subpath = subpath[1:]
+      candidate = os.path.abspath(os.path.join(mapto, subpath))
+      if not candidate.startswith(mapto):
+        return None
+      return candidate
+
+    if self._root_mappath:
+      candidate = os.path.abspath(os.path.join(self._root_mappath, path[1:]))
+      if not candidate.startswith(self._root_mappath):
+        return None
+      return candidate
 
   def on_exit(self, m, verb, data):
     logging.info("Exiting upon request.")
     self.shutdown()
 
   def serve_forever(self):
-    self.is_running_ = True
-    while self.is_running_:
+    self._is_running = True
+    while self._is_running:
       self.try_handle_request(0.2)
 
   def try_handle_request(self, delay):
@@ -90,16 +130,20 @@ class FrontendDaemon(BaseHTTPServer.HTTPServer):
       self.handle_request()
 
   def shutdown(self):
-    self.is_running_ = False
+    self._is_running = False
     self.server_close()
     return 1
 
-
 if __name__ == "__main__":
   port = int(sys.argv[1])
-  basedir = sys.argv[2]
-
-  os.chdir(basedir)
-  daemon = FrontendDaemon("", port)
+  rest = sys.argv[2:]
+  if len(rest) % 2 != 0:
+    raise Exception("Must specify pairs of directories to map")
+  mapped_dirs = {}
+  for i in range(len(rest) / 2):
+    p = rest[2*i]
+    d = rest[2*i + 1]
+    mapped_dirs[p] = d;
+  daemon = FrontendDaemon("", port, mapped_dirs)
   daemon.serve_forever()
   sys.exit(0)

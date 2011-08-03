@@ -13,16 +13,15 @@
 # limitations under the License.
 import browser
 import deps
+import frontend_resources
+import frontend_daemon_host
 import message_loop
 import unittest
 import urllib
 
-from frontend_download import FrontendDownload
-from frontend_daemon_host import FrontendDaemonHost
-
 __all__ = ["ClosureJSUnitRunner"]
 
-_dl = None
+_fer = None
 
 POLL_RATE = 0.2
 DEFAULT_TIMEOUT = 10
@@ -32,12 +31,12 @@ class ClosureJSUnitRunner(unittest.TestCase):
   def go(self, test_path, timeout = DEFAULT_TIMEOUT):
     self._drop_timeout = False
     self.test_path = test_path
-    global _dl
+    global _fer
     self.host = None
     try:
-      if not _dl:
-        _dl = FrontendDownload(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-      self.host = FrontendDaemonHost(23252, _dl.data_dir)
+      if not _fer:
+        _fer = frontend_resources.FrontendResources()
+      self.host = frontend_daemon_host.FrontendDaemonHost(23252, _fer.dir_mappings)
       self.browser = browser.Browser()
       u = urllib.basejoin(self.host.baseurl, self.test_path)
       self.browser.load_url(u)
@@ -83,4 +82,3 @@ class ClosureJSUnitRunner(unittest.TestCase):
   def cleanUp(self):
     if self.host:
       self.host.close() # prevent host from leaking its daemon
-

@@ -11,8 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from closure_jsunit_runner import *
+import unittest
+import deps
+from chrome_svn_checkout import ChromeSVNCheckout
 
-class FrontendTest(ClosureJSUnitRunner):
-  def test_overlay(self):
-    self.go("/chrome/gpu_internals/overlay_test.html")
+class ChromeSVNCheckoutTest(unittest.TestCase):
+  def test_download(self):
+    fe = ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
+    rev = fe.svn_getrev(fe.shared_path)
+    if type(deps.CHROME_SVN_REV) == int:
+      self.assertEquals(rev, deps.CHROME_SVN_REV)
+    fe.close()
