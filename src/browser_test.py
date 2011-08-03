@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import browser
+import frontend_resources
 import message_loop
 import os
 import unittest
@@ -21,7 +22,7 @@ from frontend_daemon_host import FrontendDaemonHost
 
 class BrowserTest(unittest.TestCase):
   def setUp(self):
-    self.host = FrontendDaemonHost(12345, os.getcwd())
+    self.host = FrontendDaemonHost(12345, {"/": os.getcwd()})
     self.browser = browser.Browser()
 
   def test_browser(self):
@@ -42,7 +43,7 @@ class BrowserTest(unittest.TestCase):
   def test_run_javascript(self):
     self.browser.show()
     def step2():
-      ret = self.browser.run_javascript("1 + 1")
+      ret = self.browser.run_javascript("1 + 1", require_loaded=False)
       self.assertEquals("2", ret)
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
@@ -56,9 +57,9 @@ class BrowserTest(unittest.TestCase):
     """
     self.browser.show()
     def step2():
-      ret = self.browser.run_javascript("1 + 2")
+      ret = self.browser.run_javascript("1 + 2", require_loaded=False)
       self.assertEquals("3", ret)
-      ret = self.browser.run_javascript("2 + 1")
+      ret = self.browser.run_javascript("2 + 1", require_loaded=False)
       self.assertEquals("3", ret)
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
@@ -70,7 +71,7 @@ class BrowserTest(unittest.TestCase):
     """
     self.browser.show()
     def step2():
-      ret = self.browser.run_javascript("""JSON.stringify({a: 3, b: 'foo', c: "bar"})""")
+      ret = self.browser.run_javascript("""JSON.stringify({a: 3, b: 'foo', c: "bar"})""", require_loaded=False)
       self.assertEquals('{"a":3,"b":"foo","c":"bar"}', ret);
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
@@ -79,7 +80,7 @@ class BrowserTest(unittest.TestCase):
   def test_run_javascript_that_throws(self):
     self.browser.show()
     def step2():
-      ret = self.browser.run_javascript("""throw Error('Foo');""")
+      ret = self.browser.run_javascript("""throw Error('Foo');""", require_loaded=False)
       # ret is pretty implmenetation specific, so best to just ensure it returns
       # todo, make the run_javascript throw ^_^
       message_loop.quit_main_loop()
@@ -89,25 +90,11 @@ class BrowserTest(unittest.TestCase):
   def test_run_javascript_that_wont_parse(self):
     self.browser.show()
     def step2():
-      ret = self.browser.run_javascript("""'""")
+      ret = self.browser.run_javascript("""'""", require_loaded=False)
       # ret is pretty implmenetation specific, so best to just ensure it returns
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
-
-  def test_exception_stops_test(self):
-    self.browser.show()
-    def step2():
-      raise Exception, "_noprint expected exception" # _noprint is trapped by run_tests and supresses print
-    message_loop.post_delayed_task(step2, 0.1)
-    self.assertRaises(Exception, lambda: message_loop.run_main_loop())
-
-  def test_assert_failing_stops_test(self):
-    self.browser.show()
-    def step2():
-      self.assertFalse(True,msg="_noprint")
-    message_loop.post_delayed_task(step2, 0.1)
-    self.assertRaises(Exception, lambda: message_loop.run_main_loop())
 
   def tearDown(self):
     self.host.close()

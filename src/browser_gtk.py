@@ -91,10 +91,10 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     logging.debug("Load finished");
     self._loaded = True
 
-  def run_javascript(self, script):
-    if self._loaded == False:
-      return None
+  def run_javascript(self, script, require_loaded = True):
     if (self.flags() & gtk.REALIZED) == 0:
+      return None
+    if require_loaded and self._loaded == False:
       return None
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.

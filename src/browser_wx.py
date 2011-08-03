@@ -55,7 +55,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
   def load_url(self, url):
     self._webview.LoadURL(url)
 
-  def run_javascript(self, script):
+  def run_javascript(self, script, require_loaded = True):
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.
     script = script.replace('"', '\\"')
