@@ -1,3 +1,6 @@
 [submodule "third_party/es5-shim"]
 	path = third_party/es5-shim
 	url = https://github.com/kriskowal/es5-shim.git
+[submodule "third_party/py_trace_event"]
+	path = third_party/py_trace_event
+	url = git@github.com:natduca/py_trace_event.git
