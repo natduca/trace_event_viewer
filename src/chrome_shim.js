@@ -24,7 +24,7 @@ if (!window["chrome"]) {
 
     __proto__: Object.prototype,
 
-    /** Called by gpu_internals/ code to interact with the world
+    /** Called by tracing/ code to interact with the world
      * outside of javascript. This shim forwards these messages
      * via frontend_daemon.py to chrome_handlers.py
      * @param {string} msg The message being sent to chrome_handlers.

@@ -15,4 +15,4 @@ from closure_jsunit_runner import *
 
 class FrontendTest(ClosureJSUnitRunner):
   def test_overlay(self):
-    self.go("/chrome/gpu_internals/overlay_test.html")
+    self.go("/chrome/tracing/overlay_test.html")

@@ -35,11 +35,11 @@ class ChromeSVNCheckout(object):
 
     shared_url = self.url_to('chrome/browser/resources/shared/')
     self.shared_path = self.path_to('shared')
-    gpu_internals_url = self.url_to('chrome/browser/resources/gpu_internals/')
-    self.gpu_internals_path = self.path_to('gpu_internals')
+    tracing_url = self.url_to('chrome/browser/resources/tracing/')
+    self.tracing_url = self.path_to('tracing')
 
     self.svn_update(shared_url, rev, self.shared_path)
-    self.svn_update(gpu_internals_url, rev, self.gpu_internals_path)
+    self.svn_update(tracing_url, rev, self.tracing_url)
 
     ok,err = self.verify_checkout()
     if not ok:
@@ -49,7 +49,7 @@ class ChromeSVNCheckout(object):
     """Makes sure that key files are present."""
     required = [
       'shared/js/cr.js',
-      'gpu_internals/timeline.js'
+      'tracing/timeline.js'
       ]
     missing = []
     for r in required:

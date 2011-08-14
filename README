@@ -1,8 +1,8 @@
-trace_event is a standalone version of Chrome's trace_event viewer,
-plus some additional code for collecting data outside of chrome.
+trace_event is a standalone version of Chrome's about:tracing. Should work
+on OSX and Linux.
 
-It is mostly a webapp, so it runs anywhere you can get a Python version of
-Webkit to work.
+To generate traces viewable by this tool, consider using:
+- https://github.com/natduca/py_trace_event
 
 The trace files that trace_viewer understands are insanely simple, so it is
 pretty easy to hack up your favorite system to produce them.

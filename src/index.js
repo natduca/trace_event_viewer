@@ -5,19 +5,19 @@
   var include = function(path) {
     document.write('<script src="' + path + '"></script>');
   };
-  include("/chrome/gpu_internals/overlay.js");
-  include("/chrome/gpu_internals/timeline_model.js");
-  include("/chrome/gpu_internals/sorted_array_utils.js");
-  include("/chrome/gpu_internals/timeline.js");
-  include("/chrome/gpu_internals/timeline_track.js");
-  include("/chrome/gpu_internals/fast_rect_renderer.js");
-  include("/chrome/gpu_internals/timeline_view.js");
+  include("/chrome/tracing/overlay.js");
+  include("/chrome/tracing/timeline_model.js");
+  include("/chrome/tracing/sorted_array_utils.js");
+  include("/chrome/tracing/timeline.js");
+  include("/chrome/tracing/timeline_track.js");
+  include("/chrome/tracing/fast_rect_renderer.js");
+  include("/chrome/tracing/timeline_view.js");
 
   var timelineView;
 
   function onDOMContentLoaded() {
     timelineView = $('timeline-view');
-    cr.ui.decorate(timelineView, gpu.TimelineView);
+    cr.ui.decorate(timelineView, tracing.TimelineView);
     chrome.send('ready');
   }
 

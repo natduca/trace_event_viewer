@@ -31,7 +31,7 @@ class DepsTest(unittest.TestCase):
     self.assertTrue(base.endswith('/'))
     urllib2.urlopen(base).read()
     u1 = urllib.basejoin(base, 'chrome/browser/resources/shared/js/cr.js')
-    u2 = urllib.basejoin(base, 'chrome/browser/resources/gpu_internals/timeline.js')
+    u2 = urllib.basejoin(base, 'chrome/browser/resources/tracing/timeline.js')
     urllib2.urlopen(u1).read()
     urllib2.urlopen(u2).read()
 
