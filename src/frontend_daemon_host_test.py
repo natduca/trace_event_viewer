@@ -15,6 +15,7 @@ import tempfile
 import os
 import shlex
 import subprocess
+import sys
 import unittest
 import frontend_resources
 from frontend_daemon_host import FrontendDaemonHost
@@ -46,16 +47,24 @@ class FrontendDaemonHostTest(unittest.TestCase):
 
   def setUp(self):
     self.host = None
+
+  def test_host(self):
     self.test_data_dir = os.path.realpath(os.path.join(tempfile.gettempdir(), 'frontend_daemon_host_test'))
     if os.path.exists(self.test_data_dir):
       self.rm_rf(self.test_data_dir)
     os.makedirs(self.test_data_dir)
     self.write1('index.html')
     self.host = FrontendDaemonHost(12345, {"/" : self.test_data_dir})
-
-  def test_host(self):
     x = self.host.urlread("/index.html")
     self.assertEquals('1\n', x)
+
+  def test_host_with_odd_cwd(self):
+    oldcwd = os.getcwd()
+    try:
+      os.chdir(os.path.dirname(sys.executable))
+      self.test_host()
+    finally:
+      os.chdir(oldcwd)
 
   def tearDown(self):
     if self.host:

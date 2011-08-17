@@ -54,11 +54,12 @@ class FrontendDaemonHost(object):
       raise Exception("Daemon running")
     self._port = port
 
+    topdir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     args = [sys.executable, "-m", "src.frontend_daemon", str(port)]
     for p,d in resources.items():
       args.append(p)
       args.append(d)
-    self._daemon_proc = subprocess.Popen(args)
+    self._daemon_proc = subprocess.Popen(args, cwd=topdir)
     try:
       self._wait_for_daemon_start()
     except Exception, ex:

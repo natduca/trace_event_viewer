@@ -90,7 +90,6 @@ def main(args):
   return 0
 
 if __name__ == '__main__':
-  os.chdir(os.path.dirname(__file__))
   if platform.system() == 'Darwin':
     if os.getenv('VERSIONER_PYTHON_PREFER_32_BIT') != 'yes':
       os.putenv('VERSIONER_PYTHON_PREFER_32_BIT', 'yes')
