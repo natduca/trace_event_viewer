@@ -45,6 +45,8 @@ Trace events are of the following format:
   "ph": "B" | "E" | "I" | "M"
 }
 
+Time is currently given in microseconds.
+
 B and E type events correspond to the beginning and end of work
 on a given thread:
 {
