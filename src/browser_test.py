@@ -96,5 +96,14 @@ class BrowserTest(unittest.TestCase):
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
 
+  def test_run_javascript_with_newline(self):
+    self.browser.show()
+    def step2():
+      ret = self.browser.run_javascript("""1+1\n""", require_loaded=False)
+      # just ensure it returns
+      message_loop.quit_main_loop()
+    message_loop.post_delayed_task(step2, 0.1)
+    message_loop.run_main_loop()
+
   def tearDown(self):
     self.host.close()

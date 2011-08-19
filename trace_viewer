@@ -55,6 +55,17 @@ def main(args):
     return 255
   trace_data = open(args[0]).read()
 
+  # detect array formats
+  if trace_data.startswith('['):
+    trace_data = trace_data.strip()
+    if trace_data.endswith(']'):
+      trace_data = """{"traceEvents": %s}""" % trace_data
+    else:
+      # its an array, but the close ] is missing, which we allow
+      trace_data = """{"traceEvents": %s]}""" % trace_data      
+  if trace_data.find('\n') != -1:
+    trace_data = trace_data.replace('\n', '')
+
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
     ok = True

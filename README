@@ -34,13 +34,30 @@ Windows: Should be possible, but I've got to remove dependencies on
 Trace file format
 ===========================================================================
 
-The format for trace files is as follows:
+A trace file is just an array of events, dumped into a file in
+JSON. trace_event_viewer recognizes two different mappings of this array --- the
+JSON-formatted array, or a JSON object with a member "traceEvents" containing
+the actual events.
+
+The object-wrapped format is:
 {
-  "traceEvents": [event list]
-  ... any metadata you want...
+  "traceEvents": [event1,event2,...]
+  ... any metadata you want... will be ignored.
 }
 
-Trace events are of the following format:
+The array format is:
+[event1,event2,...]
+
+The closing ] is optional in the array format. E.g. the following is valid:
+[event1,event2,
+
+This is done to support tracing systems that cannot cleanly finish writing the
+trace, e.g. during exit.
+
+
+Trace events
+===========================================================================
+Events are of the following format:
 {
   "ph": "B" | "E" | "I" | "M"
 }
