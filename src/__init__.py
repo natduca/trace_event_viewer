@@ -104,5 +104,10 @@ def main(args):
       host.close() # prevent host from leaking its daemon
   return 0
 
-if __name__ == "__main__":
-  print foom
+
+if __name__ == "__main__" and sys.platform == 'darwin':
+  # assume we were launched inside a bundle
+  import Foundation
+  b = Foundation.NSBundle.mainBundle()
+  print b.infoDictionary()["CFBundleName"]
+  main(sys.argv[1:])

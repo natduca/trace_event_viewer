@@ -17,22 +17,9 @@ import sys
 
 if __name__ == '__main__':
   if sys.platform == 'darwin':
-    # Try using the objc UI, fall back to wx if not found
-    objc_found = False
-    try:
-      import objc
-      # TODO: check for bundle --- if we're inside the python bundle, relaunch using trace_viewer.app
-      objc_found = False
-    except ImportError:
-      pass
-    if objc_found:
-      import os
-      basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-      trace_viewer_app = os.path.join(basedir, "trace_viewer.app/Contents/MacOS/trace_viewer")
-      if os.path.exists(trace_viewer):
-        argv = [trace_viewer_app]
-        argv.extend(sys.argv)
-        os.execv(trace_viewer_app, argv)
+    if ('--triedenv' not in sys.argv) and ('--triedarch' not in sys.argv):
+      import src.objc_stub
+      src.objc_stub.try_to_exec_stub()
 
     # To use wx-widgets on darwin, we need to be in 32 bit mode. Import of wx
     # will fail if you run python in 64 bit mode, which is default in 10.6+. :'(
