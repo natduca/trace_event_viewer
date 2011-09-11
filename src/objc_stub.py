@@ -136,7 +136,7 @@ def run_real_main():
   
   assert os.path.exists(os.path.join(basedir, "src/__init__.py"))
   sys.path.append(basedir)
-  import src
+  src = __import__("src") # do this to prevent disttools from discovering this dependency!!
   src.main(sys)
 
 if __name__ == "__main__":
