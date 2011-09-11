@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright 2011 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +16,13 @@ import sys
 def detect_toolkit():
   # try using PyObjC on mac
   if sys.platform == 'darwin':
-    try:
-      import objc
-#      return (False, False, True)
-    except ImportError:
-      pass
+    import src
+    if src._objc_enabled:
+      try:
+        import objc
+        return (False, False, True)
+      except ImportError:
+        pass
 
   # try using gtk
   try:

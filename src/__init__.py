@@ -16,14 +16,42 @@ import optparse
 import os
 import sys
 
+_objc_enabled = False
+
 def main(args):
+
+  usage = "Usage: %prog [options] trace_file"
+  parser = optparse.OptionParser(usage=usage)
+  parser.add_option(
+      '-v', '--verbose', action='count', default=0,
+      help='Increase verbosity level (repeat as needed)')
+  parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
+  parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
+  parser.add_option('--objc', dest='objc', action='store_true', default=False, help='Enable experimental support for PyObjC-based GUI')
+  (options, args) = parser.parse_args()
+
+  global _objc_enabled
+  if options.objc:
+    print "foo"
+    _objc_enabled = True
+
   import message_loop
   if not message_loop.has_toolkit:
-    print """No supported GUI toolkit found. Trace_event_viewer supports PyGtk, WxPython and PyObjC"""
+    if _objc_enabled:
+      print """No supported GUI toolkit found. Trace_event_viewer supports PyGtk, WxPython and PyObjC"""
+    else:
+      print """No supported GUI toolkit found. Trace_event_viewer supports PyGtk and WxPython"""
     return -1
 
-  # these imports are held until the main function because of the voodo that
-  # we do at the bottom of the file to get python launched in 32 bit mode.
+  if options.verbose >= 2:
+    logging.basicConfig(level=logging.DEBUG)
+  elif options.verbose:
+    logging.basicConfig(level=logging.INFO)
+  else:
+    logging.basicConfig(level=logging.WARNING)
+
+  # these imports are held until the main function because we want to avoid side effects when
+  # settings up the command line.
   import re
   import urllib
   import browser as browser
@@ -32,21 +60,6 @@ def main(args):
   import frontend_daemon_host as frontend_daemon_host
   import message_loop as message_loop
   import chrome_shim as chrome_shim
-  usage = "Usage: %prog [options] trace_file"
-  parser = optparse.OptionParser(usage=usage)
-  parser.add_option(
-      '-v', '--verbose', action='count', default=0,
-      help='Increase verbosity level (repeat as needed)')
-  parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
-  parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
-  (options, args) = parser.parse_args()
-
-  if options.verbose >= 2:
-    logging.basicConfig(level=logging.DEBUG)
-  elif options.verbose:
-    logging.basicConfig(level=logging.INFO)
-  else:
-    logging.basicConfig(level=logging.WARNING)
 
   if options.debug:
     browser.debug_mode = True
