@@ -24,6 +24,8 @@ if message_loop.is_gtk:
   import browser_gtk as platform_browser
 elif message_loop.is_wx:
   import browser_wx as platform_browser
+elif message_loop.is_objc:
+  import browser_objc as platform_browser
 
 debug_mode = False
 
