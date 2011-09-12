@@ -16,5 +16,5 @@ import os
 import sys
 
 if __name__ == '__main__':
-  import src
-  src.bootstrap_main('trace_viewer')
+  import src.bootstrap as bootstrap
+  bootstrap.main('src.trace_viewer')

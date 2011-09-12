@@ -16,8 +16,8 @@ import sys
 def detect_toolkit():
   # try using PyObjC on mac
   if sys.platform == 'darwin':
-    import src
-    if src._objc_enabled:
+    import bootstrap
+    if bootstrap._objc_enabled:
       try:
         import objc
         return (False, False, True)

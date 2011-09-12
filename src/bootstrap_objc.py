@@ -57,25 +57,25 @@ def try_to_exec_stub(main_name, tried_once=False):
       if os.path.exists(os.path.join(basedir, "./support/trace_viewer_stub.app/")):
         shutil.rmtree(os.path.join(basedir, "./support/trace_viewer_stub.app/"))
       create_stub()
-      return try_to_exec_stub(True)
+      return try_to_exec_stub(main_name, True)
 
     # look for the stub itself
-    objc_stub_py = os.path.join(basedir, "./support/trace_viewer_stub.app/Contents/Resources/objc_stub.py")
-    if not os.path.exists(objc_stub_py):
-      print "Warning: something is messed up with the ObjC stub. You should regenerate it with python -m src.objc_stub"
+    bootstrap_objc_py = os.path.join(basedir, "./support/trace_viewer_stub.app/Contents/Resources/bootstrap_objc.py")
+    if not os.path.exists(bootstrap_objc_py):
+      print "Warning: something is messed up with the ObjC stub. You should regenerate it with python -m src.bootstrap_objc"
       import shutil
       if os.path.exists(os.path.join(basedir, "./support/trace_viewer_stub.app/")):
         shutil.rmtree(os.path.join(basedir, "./support/trace_viewer_stub.app/"))
       create_stub()
       return try_to_exec_stub()
 
-    # Found the stub, but is the stub's copy of objc_stub this one?
+    # Found the stub, but is the stub's copy of bootstrap_objc this one?
     # TODO: what we probably should do is point the bundle's stub at this via symlink
     this_stub = os.path.splitext(__file__)[0] + '.py'
-    if os.stat(objc_stub_py).st_mtime < os.stat(this_stub).st_mtime:
-      print "Note: updating the stub's objc_stub manually."
+    if os.stat(bootstrap_objc_py).st_mtime < os.stat(this_stub).st_mtime:
+      print "Note: updating the stub's bootstrap_objc manually."
       import shutil
-      shutil.copyfile(this_stub, objc_stub_py)
+      shutil.copyfile(this_stub, bootstrap_objc_py)
 
     # execv over to the stub... this python smelled funny, anyway.
     argv = [trace_viewer_stub_app, "--main-name", main_name]
@@ -114,7 +114,7 @@ def create_stub():
   setup(
     script_args=["py2app"],
     name="trace_viewer_stub",
-    app=['./src/objc_stub.py'],
+    app=['./src/bootstrap_objc.py'],
     data_files=["./src/trace_viewer.nib"],
     options={
       "py2app": {
@@ -139,8 +139,8 @@ def run_real_main():
 
   assert os.path.exists(os.path.join(basedir, "src/__init__.py"))
   sys.path.append(basedir)
-  src = __import__("src") # do this to prevent disttools from discovering this dependency!!
-  src.run()
+  bootstrap = __import__("src.bootstrap", {}, {}, True) # do this to prevent disttools from discovering this dependency!!
+  bootstrap.run()
 
 if __name__ == "__main__":
   if is_inside_stub_bundle():
