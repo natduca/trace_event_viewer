@@ -77,6 +77,19 @@ def try_to_exec_stub(main_name, tried_once=False):
       import shutil
       shutil.copyfile(this_stub, bootstrap_objc_py)
 
+    # look for the nib itself and make sure its updated
+    bootstrap_nib = os.path.join(basedir, "./support/trace_viewer_stub.app/Contents/Resources/trace_viewer.nib")
+    bootstrap_nib_designable = os.path.join(bootstrap_nib, "designable.nib")
+    if not os.path.exists(bootstrap_nib_designable):
+      raise "Critical failure looking for the nib"
+    this_nib = os.path.join(basedir, "./src/trace_viewer.nib")
+    this_nib_designable = os.path.join(this_nib, "designable.nib")
+    if os.stat(bootstrap_nib_designable).st_mtime < os.stat(this_nib_designable).st_mtime:
+      print "Note: updating the stub's nib manually."
+      import shutil
+      shutil.rmtree(bootstrap_nib)
+      shutil.copytree(this_nib, bootstrap_nib)
+
     # execv over to the stub... this python smelled funny, anyway.
     argv = [trace_viewer_stub_app, "--main-name", main_name]
     argv.extend(sys.argv)
