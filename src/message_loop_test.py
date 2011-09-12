@@ -31,6 +31,16 @@ class MessageLoopTest(unittest.TestCase):
     message_loop.post_task(step2)
     message_loop.run_main_loop()
 
+  def test_post_two_tasks(self):
+    def step2():
+      self.assertTrue(message_loop.is_main_loop_running())
+      message_loop.post_task(step3)
+    def step3():
+      self.assertTrue(message_loop.is_main_loop_running())
+      message_loop.quit_main_loop()
+    message_loop.post_task(step2)
+    message_loop.run_main_loop()
+
   def test_is_main_loop_running(self):
     def step2():
       self.assertTrue(message_loop.is_main_loop_running())
