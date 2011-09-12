@@ -98,4 +98,6 @@ def quit_main_loop(quit_with_exception):
   global _raise_exception_after_quit
   if quit_with_exception:
     _raise_exception_after_quit = True
+  global _current_main_loop_instance
+  _current_main_loop_instance += 1
   _app.ExitMainLoop()

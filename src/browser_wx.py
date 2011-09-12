@@ -27,6 +27,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
     self._debug_ctrl = wx.TextCtrl(self, -1, "")
     self.Bind(wx.EVT_TEXT_ENTER, self.on_evt_debug_enter, self._debug_ctrl)
     self.Bind(wx.EVT_CHAR_HOOK, self.on_evt_char)
+    self.Bind(wx.EVT_CLOSE, self.on_evt_close)
 
     outer_sizer = wx.BoxSizer(wx.VERTICAL)
     outer_sizer.Add(self._webview, 1, wx.ALL | wx.EXPAND)
@@ -38,6 +39,12 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
       self._debug_ctrl.Show()
     else:
       self._debug_ctrl.Hide()
+    self._closed = False
+
+  def on_evt_close(self, e):
+    self._closed = True
+    self.Destroy()
+    message_loop.quit_main_loop()
     
   def on_evt_char(self, e):
     if self.FindFocus() == self._debug_ctrl:
@@ -56,6 +63,8 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
     self._webview.LoadURL(url)
 
   def run_javascript(self, script, require_loaded = True):
+    if self._closed:
+      return None
     # this wraps the script in an eval, then a try-catch, and then tostrings the result in a null/undef-safe way
     # when you dont do this, it takes down WxPython completely.
     if script.find('"') != -1:
