@@ -18,10 +18,33 @@ import sys
 
 _objc_enabled = False
 
-def handle_args(options, args):
+def run():
+  """Called by bootstrapper when the environment is ready to run."""
+  if sys.argv[1] != '--main-name':
+    raise Exception("launched wrong: expected --main-name <mainname> as first argument")
+  main_name = sys.argv[2]
+  del sys.argv[1:3] # remove the --main-name argument
+
+
+  mod = __import__(main_name, {}, {}, True)
+  parser = optparse.OptionParser(usage=mod.main_usage())
+  parser.add_option('--objc', dest='objc', action='store_true', default=False, help='Enable experimental support for PyObjC-based GUI')
+  parser.add_option(
+      '-v', '--verbose', action='count', default=0,
+      help='Increase verbosity level (repeat as needed)')
+  original_parse_args = parser.parse_args
+  def parse_args_shim():
+    options, args = original_parse_args()
+    handle_options(options, args)
+    return options, args
+  parser.parse_args = parse_args_shim
+
+  mod.main(parser)
+
+def handle_options(options, args):
+  """Called by bootstrapper to process global commandline options."""
   global _objc_enabled
   if options.objc:
-    print "foo"
     _objc_enabled = True
 
   import message_loop
@@ -39,29 +62,9 @@ def handle_args(options, args):
   else:
     logging.basicConfig(level=logging.WARNING)
 
-def run():
-  if sys.argv[1] != '--main-name':
-    raise Exception("launched wrong: expected --main-name <mainname> as first argument")
-  main_name = sys.argv[2]
-  del sys.argv[1:3] # remove the --main-name argument
-
-
-  mod = __import__(main_name, {}, {}, True)
-  parser = optparse.OptionParser(usage=mod.main_usage())
-  parser.add_option(
-      '-v', '--verbose', action='count', default=0,
-      help='Increase verbosity level (repeat as needed)')
-  parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
-  original_parse_args = parser.parse_args
-  def parse_args_shim():
-    options, args = original_parse_args()
-    handle_args(options, args)
-    return options, args
-  parser.parse_args = parse_args_shim
-
-  mod.main(parser)
-
 def main(main_name):
+  """The main entry point to the bootstrapper. Call this with the module name to
+  use as your main app."""
   if sys.platform == 'darwin':
     if ('--objc' in sys.argv) and ('--triedenv' not in sys.argv) and ('--triedarch' not in sys.argv):
       import bootstrap_objc

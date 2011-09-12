@@ -20,8 +20,8 @@ def main_usage():
   return "Usage: %prog [options] trace_file"
 
 def main(parser):
-  parser.add_option('--objc', dest='objc', action='store_true', default=False, help='Enable experimental support for PyObjC-based GUI')
   parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
+  parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Add UI for JS debugging')
   (options, args) = parser.parse_args()
 
   # these imports are held until the main function because we want to avoid side effects when
