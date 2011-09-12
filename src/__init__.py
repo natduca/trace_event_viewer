@@ -18,7 +18,7 @@ import sys
 
 _objc_enabled = False
 
-def main(args):
+def main():
   usage = "Usage: %prog [options] trace_file"
   parser = optparse.OptionParser(usage=usage)
   parser.add_option(
@@ -115,3 +115,69 @@ def main(args):
     if host:
       host.close() # prevent host from leaking its daemon
   return 0
+
+def run():
+  if sys.argv[1] != '--main-name':
+    raise Exception("launched wrong")
+  main_name = sys.argv[2]
+  del sys.argv[1:2]
+  if main_name == 'trace_viewer':
+    main()
+  else:
+    raise "Unrecognized main name: %s" % main_name
+
+def bootstrap_main(main_name):
+  if sys.platform == 'darwin':
+    if ('--triedenv' not in sys.argv) and ('--triedarch' not in sys.argv):
+      import objc_stub
+      objc_stub.try_to_exec_stub(main_name)
+
+    # To use wx-widgets on darwin, we need to be in 32 bit mode. Import of wx
+    # will fail if you run python in 64 bit mode, which is default in 10.6+. :'(
+    # It is depressingly hard to force python into 32 bit mode reliably across
+    # computers, for some reason. So, we try two approaches known to work... one
+    # after the other.
+    wx_found_but_failed = False
+    try:
+      import wx
+    except ImportError:
+      if str(sys.exc_value).find("no appropriate 64-bit"):
+        wx_found_but_failed = True
+
+    if wx_found_but_failed:
+      # try using the versioner trick
+      if '--triedenv' not in sys.argv:
+        os.putenv('VERSIONER_PYTHON_PREFER_32_BIT', 'yes')
+        args = [sys.executable, sys.argv[0], '--triedenv']
+        args.extend(sys.argv[1:])
+        os.execve(args[0], args, os.environ)
+
+      # last chance...
+      if '--triedarch' not in sys.argv:
+        args = ["/usr/bin/arch", "-i386", sys.executable, sys.argv[0], '--triedarch']
+        args.extend(sys.argv[1:])
+        os.execv(args[0], args)
+
+      # did we already try one of the tricks below? Bail out to prevent recursion...
+      print "Your system's python is 64 bit, and all the tricks we know to get it into 32b mode failed."
+      sys.exit(255)
+
+    else:
+      try:
+        sys.argv.remove('--triedenv')
+      except:
+        pass
+      try:
+        sys.argv.remove('--triedarch')
+      except:
+        pass
+      import src
+      sys.argv.insert(1, '--main_name')
+      sys.argv.insert(2, main_name)
+      sys.exit(run())
+
+  else:
+    import src
+    sys.argv.insert(1, '--main_name')
+    sys.argv.insert(2, main_name)
+    sys.exit(run())

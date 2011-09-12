@@ -34,7 +34,7 @@ if sys.platform != 'darwin':
 #
 # Did that make you sick, too?
 
-def try_to_exec_stub(tried_once=False):
+def try_to_exec_stub(main_name, tried_once=False):
   # If laucned via the command line, then we will looko for the stub and if
   # found, will run that instead, on the fervent hope that it will eventually
   # be kind enough to call src.__init__'s main()
@@ -78,7 +78,7 @@ def try_to_exec_stub(tried_once=False):
       shutil.copyfile(this_stub, objc_stub_py)
 
     # execv over to the stub... this python smelled funny, anyway.
-    argv = [trace_viewer_stub_app]
+    argv = [trace_viewer_stub_app, "--main-name", main_name]
     argv.extend(sys.argv)
     os.execv(trace_viewer_stub_app, argv)
 
@@ -134,10 +134,13 @@ def run_real_main():
   basedir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../"))
   os.chdir(basedir)
   
+  if sys.argv[1] != '--main-name':
+    raise Exception("Do not launch this stub directly.")
+
   assert os.path.exists(os.path.join(basedir, "src/__init__.py"))
   sys.path.append(basedir)
   src = __import__("src") # do this to prevent disttools from discovering this dependency!!
-  src.main(sys.argv)
+  src.run()
 
 if __name__ == "__main__":
   if is_inside_stub_bundle():
