@@ -51,6 +51,10 @@ class AppDelegate(NSObject):
   def quit_(self, a):
     print "quitting"
 
+  def applicationShouldTerminate_(self, a):
+    print "shouldterminate"
+    return True
+
 def post_task(cb, *args):
   p = (_current_main_loop_instance, cb, 0, args)
   if _is_main_loop_running:
@@ -82,6 +86,7 @@ def run_main_loop():
   try:
     _is_main_loop_running = True
     AppHelper.runEventLoop(installInterrupt=True)
+
   finally:
     _is_main_loop_running = False
     _current_main_loop_instance += 1
@@ -102,5 +107,14 @@ def quit_main_loop(quit_with_exception):
   if quit_with_exception:
     _raise_exception_after_quit = True
   _current_main_loop_instance += 1 # stop any in-flight tasks in case the objc stuff doesn't die promptly
-  AppHelper.stopEventLoop()
+  def do_quit():
+    if _raise_exception_after_quit:
+      print "MESSAGELOOP: QUIT_WITH_EXCEPTION"
+    else:
+      print "EXITED OK"
+    AppHelper.stopEventLoop() # will actually sys.exit() :'(
+
+  d = _get_cur_app_delegate()
+  d.performSelectorOnMainThread_withObject_waitUntilDone_(d.runtask, (_current_main_loop_instance, do_quit, 0, []), False)
+
   print "stop requested"
