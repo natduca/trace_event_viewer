@@ -92,7 +92,7 @@ def try_to_exec_stub(main_name, tried_once=False):
 
     # execv over to the stub... this python smelled funny, anyway.
     argv = [trace_viewer_stub_app, "--main-name", main_name]
-    argv.extend(sys.argv)
+    argv.extend(sys.argv[1:])
     os.execv(trace_viewer_stub_app, argv)
 
 def is_inside_stub_bundle():
