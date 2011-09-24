@@ -153,7 +153,12 @@ def run_real_main():
   assert os.path.exists(os.path.join(basedir, "src/__init__.py"))
   sys.path.append(basedir)
   bootstrap = __import__("src.bootstrap", {}, {}, True) # do this to prevent disttools from discovering this dependency!!
-  bootstrap.run()
+  try:
+    bootstrap.run()
+  except KeyboardInterrupt:
+    import traceback
+    traceback.print_exc()
+    sys.exit(255)
 
 if __name__ == "__main__":
   if is_inside_stub_bundle():
