@@ -12,21 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import objc
-from Foundation import *
-from AppKit import *
-from PyObjCTools import AppHelper
 import sys
+import unittest
+from AppKit import *
+from Foundation import *
+from PyObjCTools import AppHelper
 
 _is_main_loop_running = False
 _current_main_loop_instance = 0
-_raise_exception_after_quit = False
 _pending_tasks = [] # list of tasks added before the NSApplication runloop began
+_quit_handlers = []
+_active_test_result = None
+_active_test = None
+
 def _get_cur_app_delegate():
   return NSApplication.sharedApplication().delegate()
 
 class AppDelegate(NSObject):
   def awakeFromNib(self):
-    print "awake"
     for p in _pending_tasks:
       if p[2] > 0:
         self.performSelectorOnMainThread_withObject_waitUntilDone_(self.runtask, p, False)
@@ -46,17 +49,30 @@ class AppDelegate(NSObject):
 
   @objc.IBAction
   def applicationDidFinishLaunching_(self, a):
-    print "didFinishLaunching"
+    pass
 
   def quit_(self, a):
-    print "quitting"
+    pass
 
   def applicationShouldTerminate_(self, a):
-    print "shouldterminate"
     return True
 
+def _make_call_cb(cb):
+  def _call_cb(*inner_args):
+    try:
+      cb(*inner_args)
+    except unittest.TestCase.failureException:
+      if _active_test:
+        _active_test_result.addFailure(_active_test, sys.exc_info())
+        quit_main_loop()
+    except:
+      if _active_test:
+        _active_test_result.addError(_active_test, sys.exc_info())
+        quit_main_loop()
+  return _call_cb
+
 def post_task(cb, *args):
-  p = (_current_main_loop_instance, cb, 0, args)
+  p = (_current_main_loop_instance, _make_call_cb(cb), 0, args)
   if _is_main_loop_running:
     d = _get_cur_app_delegate()
     d.performSelectorOnMainThread_withObject_waitUntilDone_(d.runtask, p, False)
@@ -64,18 +80,12 @@ def post_task(cb, *args):
     _pending_tasks.append(p)
 
 def post_delayed_task(cb, delay, *args):
-  p = (_current_main_loop_instance, cb, delay, args)
+  p = (_current_main_loop_instance, _make_call_cb(cb), delay, args)
   if _is_main_loop_running:
     d = _get_cur_app_delegate()
     d.performSelector_withObject_afterDelay_(d.runtask, p, p[2])
   else:
     _pending_tasks.append(p)
-
-def _on_exception_while_in_main_loop(type, value, tb):
-  message = 'Uncaught exception:\n'
-  message += ''.join(traceback.format_exception(type, value, tb))
-  print message
-  quit_main_loop()
 
 def is_main_loop_running():
   return _is_main_loop_running
@@ -83,38 +93,29 @@ def is_main_loop_running():
 def run_main_loop():
   global _current_main_loop_instance
   global _is_main_loop_running
-  try:
-    _is_main_loop_running = True
-    AppHelper.runEventLoop(installInterrupt=True)
+  _is_main_loop_running = True
+  # we will never ever ever return from here. :'(
+  AppHelper.runEventLoop(installInterrupt=True,unexpectedErrorAlert=False)
 
-  finally:
-    _is_main_loop_running = False
-    _current_main_loop_instance += 1
-  print "stop done"
-  # todo, destroy any open windows
-  windows = NSApplication.sharedApplication().windows()
-  for w in windows:
-    w.close()
 
-  global _raise_exception_after_quit
-  if _raise_exception_after_quit:
-    _raise_exception_after_quit = False
-    raise Exception("An exception occured while running main loop.")
+def add_quit_handler(cb):
+  _quit_handlers.append(cb)
 
-def quit_main_loop(quit_with_exception):
-  global _raise_exception_after_quit
+def set_active_test(test, result):
+  global _active_test
+  global _active_test_result
+  _active_test = test
+  _active_test_result = result
+
+def quit_main_loop(quit_with_exception = False):
+  assert quit_with_exception == False
+
   global _current_main_loop_instance
-  if quit_with_exception:
-    _raise_exception_after_quit = True
   _current_main_loop_instance += 1 # stop any in-flight tasks in case the objc stuff doesn't die promptly
   def do_quit():
-    if _raise_exception_after_quit:
-      print "MESSAGELOOP: QUIT_WITH_EXCEPTION"
-    else:
-      print "EXITED OK"
+    for cb in _quit_handlers:
+      cb()
     AppHelper.stopEventLoop() # will actually sys.exit() :'(
 
   d = _get_cur_app_delegate()
   d.performSelectorOnMainThread_withObject_waitUntilDone_(d.runtask, (_current_main_loop_instance, do_quit, 0, []), False)
-
-  print "stop requested"
