@@ -16,8 +16,6 @@ import optparse
 import os
 import sys
 
-_objc_enabled = False
-
 def run():
   """Called by bootstrapper when the environment is ready to run."""
   if sys.argv[1] != '--main-name':
@@ -28,7 +26,7 @@ def run():
 
   mod = __import__(main_name, {}, {}, True)
   parser = optparse.OptionParser(usage=mod.main_usage())
-  parser.add_option('--objc', dest='objc', action='store_true', default=False, help='Enable experimental support for PyObjC-based GUI')
+  parser.add_option('--objc', action="store_true", dest="objc", help="Enable objc supoprt")
   parser.add_option(
       '-v', '--verbose', action='count', default=0,
       help='Increase verbosity level (repeat as needed)')
@@ -43,13 +41,9 @@ def run():
 
 def handle_options(options, args):
   """Called by bootstrapper to process global commandline options."""
-  global _objc_enabled
-  if options.objc:
-    _objc_enabled = True
-
   import message_loop
   if not message_loop.has_toolkit:
-    if _objc_enabled:
+    if '--objc' in sys.argv:
       print """No supported GUI toolkit found. Trace_event_viewer supports PyGtk, WxPython and PyObjC"""
     else:
       print """No supported GUI toolkit found. Trace_event_viewer supports PyGtk and WxPython"""
@@ -109,6 +103,7 @@ def main(main_name):
         sys.argv.remove('--triedarch')
       except:
         pass
+      print "At", os.getcwd()
       import src
       sys.argv.insert(1, '--main-name')
       sys.argv.insert(2, main_name)
