@@ -94,6 +94,9 @@ def post_delayed_task(cb, delay, *args):
 def is_main_loop_running():
   return _is_main_loop_running
 
+def init_main_loop():
+  NSApplication.sharedApplication()
+
 def run_main_loop():
   global _current_main_loop_instance
   global _is_main_loop_running
@@ -123,3 +126,6 @@ def quit_main_loop(quit_with_exception = False):
 
   d = _get_cur_app_delegate()
   d.performSelectorOnMainThread_withObject_waitUntilDone_(d.runtask, (_current_main_loop_instance, do_quit, 0, []), False)
+
+
+init_main_loop() # message loop must exist to do stuff
