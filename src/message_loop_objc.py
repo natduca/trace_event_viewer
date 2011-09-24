@@ -65,10 +65,14 @@ def _make_call_cb(cb):
       if _active_test:
         _active_test_result.addFailure(_active_test, sys.exc_info())
         quit_main_loop()
+        return
+      raise
     except:
       if _active_test:
         _active_test_result.addError(_active_test, sys.exc_info())
         quit_main_loop()
+        return
+      raise
   return _call_cb
 
 def post_task(cb, *args):

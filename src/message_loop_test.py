@@ -15,8 +15,9 @@
 import os
 import unittest
 import message_loop
+from ui_test_case import *
 
-class MessageLoopTest(unittest.TestCase):
+class MessageLoopTest(UITestCase):
   def setUp(self):
     if message_loop.is_wx:
       # need a window to keep the main alive
@@ -54,17 +55,6 @@ class MessageLoopTest(unittest.TestCase):
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
 
-  def test_exception_stops_test(self):
-    def step2():
-      raise Exception, "_noprint expected exception" # _noprint is trapped by run_tests and supresses print
-    message_loop.post_delayed_task(step2, 0.1)
-    self.assertRaises(Exception, lambda: message_loop.run_main_loop())
-
-  def test_assert_failing_stops_test(self):
-    def step2():
-      self.assertFalse(True,msg="_noprint")
-    message_loop.post_delayed_task(step2, 0.1)
-    self.assertRaises(Exception, lambda: message_loop.run_main_loop())
-
-  def cleanUp(self):
-    self.wx_frame.destroy()
+  def tearDown(self):
+    if message_loop.is_wx:
+      self.wx_frame.destroy()
