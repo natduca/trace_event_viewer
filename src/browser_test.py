@@ -16,11 +16,11 @@ import browser
 import frontend_resources
 import message_loop
 import os
-import unittest
 
 from frontend_daemon_host import FrontendDaemonHost
+from ui_test_case import *
 
-class BrowserTest(unittest.TestCase):
+class BrowserTest(UITestCase):
   def setUp(self):
     self.host = FrontendDaemonHost(12345, {"/": os.getcwd()})
     self.browser = browser.Browser()

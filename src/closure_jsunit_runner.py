@@ -19,6 +19,8 @@ import message_loop
 import unittest
 import urllib
 
+from ui_test_case import *
+
 __all__ = ["ClosureJSUnitRunner"]
 
 _fer = None
@@ -26,7 +28,7 @@ _fer = None
 POLL_RATE = 0.2
 DEFAULT_TIMEOUT = 10
 
-class ClosureJSUnitRunner(unittest.TestCase):
+class ClosureJSUnitRunner(UITestCase):
   """This class runs a test built on Google Closure's goog.testing.jsunit"""
   def go(self, test_path, timeout = DEFAULT_TIMEOUT):
     self._drop_timeout = False

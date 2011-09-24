@@ -17,12 +17,13 @@ import deps
 import frontend_resources
 import frontend_daemon_host
 import message_loop
-import unittest
 import urllib
+
+from ui_test_case import *
 
 DEFAULT_TIMEOUT = 10
 
-class ChromeShimTest(unittest.TestCase):
+class ChromeShimTest(UITestCase):
   """
   This class runs a page, adds a ChromeShim to it,
   and makes sure we receive sends from it
