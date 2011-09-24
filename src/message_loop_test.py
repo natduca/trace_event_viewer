@@ -57,4 +57,4 @@ class MessageLoopTest(UITestCase):
 
   def tearDown(self):
     if message_loop.is_wx:
-      self.wx_frame.destroy()
+      self.wx_frame.Destroy()
