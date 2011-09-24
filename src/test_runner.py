@@ -23,10 +23,8 @@ import traceback
 import unittest
 
 def discover(filters):
-  if hasattr(unittest.TestLoader, 'discover'):
-    return unittest.TestLoader().discover('src')
-
-  # poor mans unittest.discover
+  # poor mans unittest.discover, but that ignores classes
+  # that start with _
   loader = unittest.TestLoader()
   subsuites = []
 
@@ -36,7 +34,7 @@ def discover(filters):
         continue
       fqn = dirpath.replace('/', '.') + '.' + re.match('(.+)\.py$', filename).group(1)
 
-      # load the test
+      # load the module
       try:
         module = __import__(fqn,fromlist=[True])
       except:
@@ -58,6 +56,9 @@ def discover(filters):
       for t in base_suite:
         if isinstance(t, unittest.TestSuite):
           for i in t:
+            # skip test classes that start with an underscore
+            if i.__class__.__name__.startswith("_"):
+              continue
             if test_is_selected(i.id()):
               new_suite.addTest(i)
         elif isinstance(t, unittest.TestCase):
@@ -72,7 +73,7 @@ def discover(filters):
   return unittest.TestSuite(subsuites)
 
 def main_usage():
-  return "Usage: %prog [options] [regexp of tests to run]"
+  return "Usage: run_tests [options] [regexp of tests to run]"
 
 def main(parser):
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
