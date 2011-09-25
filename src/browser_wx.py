@@ -41,6 +41,10 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
       self._debug_ctrl.Hide()
     self._closed = False
 
+  def close(self):
+    self._closed = True
+    self.Destroy()
+
   def on_evt_close(self, e):
     self._closed = True
     self.Destroy()

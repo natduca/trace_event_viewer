@@ -116,6 +116,9 @@ class BrowserGtk(gtk.Window,browser.BrowserBase):
     logging.debug("console: %s %s %s %s" % (a, b, c, d))
     return True
 
+  def close(self):
+    self.destroy()
+
   def destroy(self):
     for i in self._webview_connected_signals:
       self._webview.disconnect(i)

@@ -99,3 +99,4 @@ class BrowserTest(UITestCase):
 
   def tearDown(self):
     self.host.close()
+    self.browser.close()

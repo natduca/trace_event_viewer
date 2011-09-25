@@ -89,7 +89,7 @@ def post_delayed_task(cb, delay, *args):
   timer.Start(max(1,int(delay * 1000)), True)
 
 def add_quit_handler(cb):
-  _quit_handlers.append(cb)
+  _quit_handlers.insert(0, cb)
 
 def set_unittests_running(running):
   global _unittests_running

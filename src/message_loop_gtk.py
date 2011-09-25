@@ -77,7 +77,7 @@ def is_main_loop_running():
   return _is_main_loop_running
 
 def add_quit_handler(cb):
-  _quit_handlers.append(cb)
+  _quit_handlers.insert(0, cb)
 
 def run_main_loop():
   global _current_main_loop_instance

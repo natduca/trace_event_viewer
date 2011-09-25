@@ -31,15 +31,61 @@ class UITestCase(unittest.TestCase):
       else:
         assert message_loop.is_main_loop_running()
         message_loop.set_active_test(self, result)
-        unittest.TestCase.run(self, result)
+        self.async_run_testcase(result)
     else:
       def do_test():
-        unittest.TestCase.run(self, result)
+        self.async_run_testcase(result)
       message_loop.post_task(do_test)
       message_loop.set_active_test(self, result)
       message_loop.run_main_loop()
       message_loop.set_active_test(None, None)
       
+  def async_run_testcase(self, result):
+    result.startTest(self)
+    testMethod = getattr(self, self._method_name)
+
+    try:
+      self.setUp()
+    except KeyboardInterrupt:
+      raise
+    except:
+      result.addError(self, self._exc_info())
+      self.async_teardown_and_stop_test(result)
+      return
+
+    ok = False
+    try:
+      testMethod()
+      ok = True
+    except self.failureException:
+      result.addFailure(self, self._exc_info())
+      self.async_teardown_and_stop_test(result)
+    except KeyboardInterrupt:
+      self.async_teardown_and_stop_test(result)
+      raise
+    except:
+      result.addError(self, self._exc_info())
+      self.async_teardown_and_stop_test(result)
+
+    def do_async_teardown_and_stop_test():
+      self.async_teardown_and_stop_test(result)
+    message_loop.add_quit_handler(do_async_teardown_and_stop_test)
+
+
+  def async_teardown_and_stop_test(self, result):
+    try:
+      try:
+        self.tearDown()
+      except KeyboardInterrupt:
+        raise
+      except:
+        result.addError(self, self._exc_info())
+        ok = False
+        if ok: result.addSuccess(self)
+    finally:
+       result.stopTest(self)
+
+
   def run_darwin(self, testResult):
     mod = __import__(self.__class__.__module__, {},{},fromlist=[True])
     # if this pops, then your test class wasn't on the module, which is required for this test system

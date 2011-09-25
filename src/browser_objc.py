@@ -40,7 +40,10 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
 
     self._loaded = False
     return self
-  
+
+  def close(self):
+    self.orderOut_(self)
+
   def load_url(self, url):
     self._loaded = False
     print "loading", url

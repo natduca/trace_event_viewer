@@ -133,7 +133,7 @@ def run_main_loop():
 
 
 def add_quit_handler(cb):
-  _quit_handlers.append(cb)
+  _quit_handlers.insert(0, cb)
 
 def set_unittests_running(running):
   global _unittests_running
