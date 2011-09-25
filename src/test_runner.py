@@ -78,8 +78,8 @@ def main_usage():
 
 def main(parser):
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Break into pdb when an assertion fails')
-  parser.add_option('--incremental', dest='incremental', action='store_true', default=False, help='Run tests one at a time.')
-  parser.add_option('--stop', dest='stop_on_error', action='store_true', default=False, help='Stop running tests on error.')
+  parser.add_option('-i', '--incremental', dest='incremental', action='store_true', default=False, help='Run tests one at a time.')
+  parser.add_option('-s', '--stop', dest='stop_on_error', action='store_true', default=False, help='Stop running tests on error.')
   (options, args) = parser.parse_args()
 
   # install hook on set_trace if --debug
