@@ -23,22 +23,21 @@ from ui_test_case import *
 class BrowserTest(UITestCase):
   def setUp(self):
     self.host = FrontendDaemonHost(12345, {"/": os.getcwd()})
-    self.browser = browser.Browser()
 
   def test_browser(self):
-    self.browser.show()
+#    self.browser.show()
     def step2():
+      self.browser = browser.Browser()
+      print "bleem"
       self.assertTrue(message_loop.is_main_loop_running())
       message_loop.quit_main_loop()
     message_loop.post_task(step2)
-    message_loop.run_main_loop()
 
   def test_delayed_task(self):
     self.browser.show()
     def step2():
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript(self):
     self.browser.show()
@@ -47,7 +46,6 @@ class BrowserTest(UITestCase):
       self.assertEquals("2", ret)
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript_twice_with_same_result(self):
     """
@@ -63,7 +61,6 @@ class BrowserTest(UITestCase):
       self.assertEquals("3", ret)
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript_that_results_in_json(self):
     """
@@ -75,7 +72,6 @@ class BrowserTest(UITestCase):
       self.assertEquals('{"a":3,"b":"foo","c":"bar"}', ret);
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript_that_throws(self):
     self.browser.show()
@@ -85,7 +81,6 @@ class BrowserTest(UITestCase):
       # todo, make the run_javascript throw ^_^
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript_that_wont_parse(self):
     self.browser.show()
@@ -94,7 +89,6 @@ class BrowserTest(UITestCase):
       # ret is pretty implmenetation specific, so best to just ensure it returns
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def test_run_javascript_with_newline(self):
     self.browser.show()
@@ -103,7 +97,6 @@ class BrowserTest(UITestCase):
       # just ensure it returns
       message_loop.quit_main_loop()
     message_loop.post_delayed_task(step2, 0.1)
-    message_loop.run_main_loop()
 
   def tearDown(self):
     self.host.close()

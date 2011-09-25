@@ -18,7 +18,7 @@ default_size = (1200,800)
 
 class BrowserBase(object):
   def __init__(self):
-    pass
+    assert message_loop.is_main_loop_running()
 
 if message_loop.is_gtk:
   import browser_gtk as platform_browser

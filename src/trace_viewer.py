@@ -74,17 +74,19 @@ def main(parser):
     else:
       fer = frontend_resources.FrontendResources()
     host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
-    b = browser.Browser()
-    shim = chrome_shim.ChromeShim(b)
-    b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
-    b.show()
-    if len(args) == 1:
-      def do_load():
 
-        res = b.run_javascript("loadTrace(JSON.parse('%s'))" % trace_data);
-        if res != 'true':
-          raise Exception('LoadTrace failed with %s', res)
-      shim.add_event_listener('ready', do_load)
+    def do_init():
+      b = browser.Browser()
+      shim = chrome_shim.ChromeShim(b)
+      b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
+      b.show()
+      if len(args) == 1:
+        def do_load():
+          res = b.run_javascript("loadTrace(JSON.parse('%s'))" % trace_data);
+          if res != 'true':
+            raise Exception('LoadTrace failed with %s', res)
+        shim.add_event_listener('ready', do_load)
+    message_loop.post_task(do_init)
     message_loop.run_main_loop()
   finally:
     if host:

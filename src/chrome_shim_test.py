@@ -30,21 +30,20 @@ class ChromeShimTest(UITestCase):
   """
   def test_shim(self):
     self.test_path = "/src/chrome_shim_test.html";
-    self.host = None
-    try:
-      fer = frontend_resources.FrontendResources()
-      self.host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
-      self.browser = browser.Browser()
-      u = urllib.basejoin(self.host.baseurl, self.test_path)
-      self.browser.load_url(u)
-      self.browser.show()
-      self.shim = chrome_shim.ChromeShim(self.browser)
-      self.shim.add_command_when_loaded(self.on_loaded)
-      self.shim.add_event_listener('foo1', self.on_foo1)
-      self.shim.add_event_listener('foo2', self.on_foo2)
-      message_loop.post_delayed_task(self.on_timeout, DEFAULT_TIMEOUT)
-      message_loop.run_main_loop()
-    finally:
+    fer = frontend_resources.FrontendResources()
+    self.host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
+    self.browser = browser.Browser()
+    u = urllib.basejoin(self.host.baseurl, self.test_path)
+    self.browser.load_url(u)
+    self.browser.show()
+    self.shim = chrome_shim.ChromeShim(self.browser)
+    self.shim.add_command_when_loaded(self.on_loaded)
+    self.shim.add_event_listener('foo1', self.on_foo1)
+    self.shim.add_event_listener('foo2', self.on_foo2)
+    message_loop.post_delayed_task(self.on_timeout, DEFAULT_TIMEOUT)
+
+  def tearDown():
+    if hasattr(self, 'host'):
       if self.host:
         self.host.close() # prevent host from leaking its daemon
 

@@ -27,6 +27,7 @@ _pending_tasks = []
 _unittests_running = False
 _active_test_result = None
 _active_test = None
+_quit_handlers = []
 
 def init_main_loop():
   global _hooked
@@ -87,6 +88,9 @@ def post_delayed_task(cb, delay, *args):
   timer.Bind(wx.EVT_TIMER, on_run, timer)
   timer.Start(max(1,int(delay * 1000)), True)
 
+def add_quit_handler(cb):
+  _quit_handlers.append(cb)
+
 def set_unittests_running(running):
   global _unittests_running
   _unittests_running = running
@@ -106,11 +110,15 @@ def run_main_loop():
   global _current_main_loop_instance
   if _unittests_running and not _active_test:
     _current_main_loop_instance += 1 # kill any enqueued tasks
+    del _pending_tasks[:]
+    del _quit_handlers[:]
     raise Exception("UITestCase must be used for tests that use the message_loop.")
 
   global _app
   global _pending_tasks_timer
   init_main_loop()
+
+  assert not is_main_loop_running()
 
   try:
     _app.MainLoop()
@@ -130,6 +138,10 @@ def run_main_loop():
     _pending_tasks_timer.Destroy()
     _pending_tasks_timer = None
   _app = None
+
+  for cb in _quit_handlers:
+    cb()
+  del _quit_handlers[:]
 
 def quit_main_loop():
   global _current_main_loop_instance

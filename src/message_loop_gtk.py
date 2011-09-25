@@ -22,6 +22,7 @@ _current_main_loop_instance = 0
 _unittests_running = False
 _active_test_result = None
 _active_test = None
+_quit_handlers = []
 
 def init_main_loop():
   global _hooked
@@ -75,14 +76,20 @@ def set_active_test(test, result):
 def is_main_loop_running():
   return _is_main_loop_running
 
+def add_quit_handler(cb):
+  _quit_handlers.append(cb)
+
 def run_main_loop():
   global _current_main_loop_instance
   global _is_main_loop_running
   if _unittests_running and not _active_test:
     _current_main_loop_instance += 1 # kill any enqueued tasks
+    del _quit_handlers[:]
     raise Exception("UITestCase must be used for tests that use the message_loop.")
 
   init_main_loop()
+
+  assert not _is_main_loop_running
 
   try:
     _is_main_loop_running = True
@@ -93,6 +100,10 @@ def run_main_loop():
 
   for w in gtk.window_list_toplevels():
     w.destroy()
+
+  for cb in _quit_handlers:
+    cb()
+  del _quit_handlers[:]
 
 def quit_main_loop():
   gtk.main_quit()

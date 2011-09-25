@@ -25,11 +25,20 @@ class UITestCase(unittest.TestCase):
     self._is_in_slave = is_in_slave
     
   def run(self, result):
-    if sys.platform == 'darwin' and '--objc' in sys.argv and not self._is_in_slave:
-      return self.run_darwin(result)
-    message_loop.set_active_test(self, result)
-    unittest.TestCase.run(self, result)
-    message_loop.set_active_test(None, None)
+    if sys.platform == 'darwin' and '--objc' in sys.argv:
+      if not self._is_in_slave:
+        return self.run_darwin(result)
+      else:
+        assert message_loop.is_main_loop_running()
+        message_loop.set_active_test(self, result)
+        unittest.TestCase.run(self, result)
+    else:
+      def do_test():
+        unittest.TestCase.run(self, result)
+      message_loop.post_task(do_test)
+      message_loop.set_active_test(self, result)
+      message_loop.run_main_loop()
+      message_loop.set_active_test(None, None)
       
   def run_darwin(self, testResult):
     mod = __import__(self.__class__.__module__, {},{},fromlist=[True])
@@ -93,7 +102,6 @@ def main(parser):
   cls = getattr(mod, options.cls)
   test = cls(options.method, is_in_slave = True)
   result = unittest.TestResult()
-  import message_loop_objc
   _output_ran = []
   def output_result():
     f = open(options.result, 'w')
@@ -105,10 +113,9 @@ def main(parser):
     f.write(s)
     f.close()
     _output_ran.append(True)
-  message_loop.set_unittests_running(True)
-  message_loop_objc.add_quit_handler(output_result)
-  test.run(result)
-  message_loop.set_unittests_running(False)
-  if len(_output_ran) == 0:
-    output_result()
-  sys.exit(0)
+  message_loop.add_quit_handler(output_result)
+  def do_test():
+    message_loop.set_unittests_running(True)
+    test.run(result)
+  message_loop.post_task(do_test)
+  message_loop.run_main_loop()

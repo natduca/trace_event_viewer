@@ -126,6 +126,7 @@ def run_main_loop():
     _current_main_loop_instance += 1 # kill any enqueued tasks
     raise Exception("UITestCase must be used for tests that use the message_loop.")
 
+  assert not _is_main_loop_running
   _is_main_loop_running = True
   # we will never ever ever return from here. :'(
   AppHelper.runEventLoop(installInterrupt=True,unexpectedErrorAlert=False)

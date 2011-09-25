@@ -13,6 +13,13 @@
 # limitations under the License.
 import sys
 
+# Two big TODOs for this system:
+#  1. rename it to be an application, not a message loop. Sadly,
+#     PyObjC is too constrained to support a real message loop abstraction,
+#     so its better to just not provide such a mechanism in the first place.
+#
+#  2. refactor to be class based. Right now, its function based and fugly.
+
 def detect_toolkit():
   # try using PyObjC on mac
   if sys.platform == 'darwin':
@@ -65,9 +72,23 @@ def init_main_loop():
   platform_message_loop.init_main_loop()
 
 def run_main_loop():
+  """
+  Runs the main loop. Note, this is not guaranteed to return on all platforms.
+  You should never call this in unit tests --- if you have a test that requires
+  UI or that wants to do asynchronous tests, derive from UITestcase which will
+  call this for you.
+  """
   platform_message_loop.run_main_loop()
 
+def add_quit_handler(cb):
+  platform_message_loop.add_quit_handler(cb)
+
 def quit_main_loop():
+  """
+  Tries to quit the main loop. Note, think of this as quitting the application,
+  not quitting the loop and returning to the run_main_loop caller. This is how a
+  sane operating system works. However, this code works on OSX.
+  """
   platform_message_loop.quit_main_loop()
 
 def set_unittests_running(running):

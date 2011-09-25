@@ -43,13 +43,14 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
   
   def load_url(self, url):
     self._loaded = False
+    print "loading", url
     self._webview.setMainFrameURL_(url)
 
   # frame load delegate methods
-  def didFinishLoadForFrame_(self, frame):
+  def webView_didFinishLoadForFrame_(self, sender, frame):
     print "didfinishloading"
     if frame == self._webview.mainFrame():
-      logging.debug("Load finPished")
+      logging.debug("Load finished")
       self._loaded = True
 
   def run_javascript(self, script, require_loaded = True):
