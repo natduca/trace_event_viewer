@@ -52,4 +52,7 @@ class MessageLoopTest(UITestCase):
 
 class MessageLoopTest2(unittest.TestCase):
   def test_message_loop_wont_run_in_regular_testcase(self):
+    def shouldnt_run():
+      raise Exception("Shouldn't ever get here")
+    message_loop.post_task(shouldnt_run)
     self.assertRaises(Exception, lambda: message_loop.run_main_loop())
