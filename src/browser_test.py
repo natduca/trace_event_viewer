@@ -23,12 +23,11 @@ from ui_test_case import *
 class BrowserTest(UITestCase):
   def setUp(self):
     self.host = FrontendDaemonHost(12345, {"/": os.getcwd()})
+    self.browser = browser.Browser()
 
   def test_browser(self):
-#    self.browser.show()
+    self.browser.show()
     def step2():
-      self.browser = browser.Browser()
-      print "bleem"
       self.assertTrue(message_loop.is_main_loop_running())
       message_loop.quit_main_loop()
     message_loop.post_task(step2)
