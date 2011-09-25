@@ -104,7 +104,9 @@ def is_main_loop_running():
 
 def run_main_loop():
   if _unittests_running and not _active_test:
+    _current_main_loop_instance += 1 # kill any enqueued tasks
     raise Exception("UITestCase must be used for tests that use the message_loop.")
+
   global _app
   global _current_main_loop_instance
   global _pending_tasks_timer
