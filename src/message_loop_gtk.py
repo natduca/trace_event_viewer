@@ -15,12 +15,32 @@ import glib
 import gtk
 import sys
 
+_hooked = False
 _is_main_loop_running = False
 _current_main_loop_instance = 0
-_raise_exception_after_quit = False
+_unittests_running = False
+_active_test_result = None
+_active_test = None
 
 def init_main_loop():
-  pass
+  global _hooked
+  if not _hooked:
+    _hooked = True
+    old_hook = sys.excepthook
+    def hook(exc, value, tb):
+      if is_main_loop_running() and _active_test:
+        if isinstance(value,unittest.TestCase.failureException):
+          _active_test_result.addFailure(_active_test, (exc, value, tb))
+        else:
+          if not str(value).startswith("_noprint"):
+            print "Untrapped exception! Exiting message loop with exception."
+          _active_test_result.addError(_active_test, (exc, value, tb))
+        quit_main_loop()
+        return
+      else:
+        old_hook(exc, value, tb)
+        return
+    sys.excepthook = hook
 
 def post_task(cb, *args):
   init_main_loop()
@@ -41,11 +61,15 @@ def post_delayed_task(cb, delay, *args):
   timeout_ms = int(delay * 1000)
   glib.timeout_add(timeout_ms, on_run)
 
-def _on_exception_while_in_main_loop(type, value, tb):
-  message = 'Uncaught exception:\n'
-  message += ''.join(traceback.format_exception(type, value, tb))
-  print message
-  quit_main_loop()
+def set_unittests_running(running):
+  global _unittests_running
+  _unittests_running = running
+
+def set_active_test(test, result):
+  global _active_test
+  global _active_test_result
+  _active_test = test
+  _active_test_result = result
 
 def is_main_loop_running():
   return _is_main_loop_running
@@ -65,13 +89,5 @@ def run_main_loop():
   for w in gtk.window_list_toplevels():
     w.destroy()
 
-  global _raise_exception_after_quit
-  if _raise_exception_after_quit:
-    _raise_exception_after_quit = False
-    raise Exception("An exception occured while running main loop.")
-
-def quit_main_loop(quit_with_exception):
-  global _raise_exception_after_quit
-  if quit_with_exception:
-    _raise_exception_after_quit = True
+def quit_main_loop():
   gtk.main_quit()

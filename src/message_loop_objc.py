@@ -22,8 +22,10 @@ _is_main_loop_running = False
 _current_main_loop_instance = 0
 _pending_tasks = [] # list of tasks added before the NSApplication runloop began
 _quit_handlers = []
+_unittests_running = False
 _active_test_result = None
 _active_test = None
+_hooked = False
 
 def _get_cur_app_delegate():
   return NSApplication.sharedApplication().delegate()
@@ -52,7 +54,7 @@ class AppDelegate(NSObject):
     pass
 
   def quit_(self, a):
-    pass
+    print "quit"
 
   def applicationShouldTerminate_(self, a):
     return True
@@ -95,9 +97,32 @@ def is_main_loop_running():
   return _is_main_loop_running
 
 def init_main_loop():
+  global _hooked
+  if not _hooked:
+    _hooked = True
+    old_hook = sys.excepthook
+    def hook(exc, value, tb):
+      print "hook"
+      if is_main_loop_running() and _active_test:
+        if isinstance(value,unittest.TestCase.failureException):
+          _active_test_result.addFailure(_active_test, (exc, value, tb))
+        else:
+          if not str(value).startswith("_noprint"):
+            print "Untrapped exception! Exiting message loop with exception."
+          _active_test_result.addError(_active_test, (exc, value, tb))
+        quit_main_loop()
+        return
+      else:
+        old_hook(exc, value, tb)
+        return
+    sys.excepthook = hook
+
   NSApplication.sharedApplication()
 
 def run_main_loop():
+  if _unittests_running and not _active_test:
+    raise Exception("UITestCase must be used for tests that use the message_loop.")
+
   global _current_main_loop_instance
   global _is_main_loop_running
   _is_main_loop_running = True
@@ -108,15 +133,17 @@ def run_main_loop():
 def add_quit_handler(cb):
   _quit_handlers.append(cb)
 
+def set_unittests_running(running):
+  global _unittests_running
+  _unittests_running = running
+
 def set_active_test(test, result):
   global _active_test
   global _active_test_result
   _active_test = test
   _active_test_result = result
 
-def quit_main_loop(quit_with_exception = False):
-  assert quit_with_exception == False
-
+def quit_main_loop():
   global _current_main_loop_instance
   _current_main_loop_instance += 1 # stop any in-flight tasks in case the objc stuff doesn't die promptly
   def do_quit():
@@ -126,6 +153,3 @@ def quit_main_loop(quit_with_exception = False):
 
   d = _get_cur_app_delegate()
   d.performSelectorOnMainThread_withObject_waitUntilDone_(d.runtask, (_current_main_loop_instance, do_quit, 0, []), False)
-
-
-init_main_loop() # message loop must exist to do stuff

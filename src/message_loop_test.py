@@ -18,13 +18,6 @@ import message_loop
 from ui_test_case import *
 
 class MessageLoopTest(UITestCase):
-  def setUp(self):
-    if message_loop.is_wx:
-      # need a window to keep the main alive
-      import wx
-      message_loop.init_main_loop()
-      self.wx_frame = wx.Frame(None, -1, "Test");
-
   def test_post_task(self):
     def step2():
       self.assertTrue(message_loop.is_main_loop_running())
@@ -55,6 +48,8 @@ class MessageLoopTest(UITestCase):
     message_loop.post_delayed_task(step2, 0.1)
     message_loop.run_main_loop()
 
-  def tearDown(self):
-    if message_loop.is_wx:
-      self.wx_frame.Destroy()
+  # UITestCaseTest tests that assertions failing will stop the test
+
+class MessageLoopTest2(unittest.TestCase):
+  def test_message_loop_wont_run_in_regular_testcase(self):
+    self.assertRaises(Exception, lambda: message_loop.run_main_loop())

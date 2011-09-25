@@ -27,7 +27,9 @@ class UITestCase(unittest.TestCase):
   def run(self, result):
     if sys.platform == 'darwin' and '--objc' in sys.argv and not self._is_in_slave:
       return self.run_darwin(result)
+    message_loop.set_active_test(self, result)
     unittest.TestCase.run(self, result)
+    message_loop.set_active_test(None, None)
       
   def run_darwin(self, testResult):
     mod = __import__(self.__class__.__module__, {},{},fromlist=[True])
@@ -52,14 +54,22 @@ class UITestCase(unittest.TestCase):
     self._slave_proc = subprocess.Popen(args, cwd=basedir)
 
     # todo, add timeout...
-    self._slave_proc.wait()
+    try:
+      self._slave_proc.wait()
+    finally:
+      if self._slave_proc.poll() == None:
+        self._slave_proc.kill()
 
     f = open(result.name, 'r')
     r = f.read()
     f.close()
     result.close()
 
-    childTestResult = eval(r)
+    try:
+      childTestResult = eval(r)
+    except:
+      print "could not eval [%s]" % r
+      raise
     testResult.startTest(self)
     for e in childTestResult["errors"]:
       testResult.errors.append((self, e)) # use this directly because addError treats the passed-in value as an exc_info
@@ -95,9 +105,10 @@ def main(parser):
     f.write(s)
     f.close()
     _output_ran.append(True)
-  message_loop_objc.set_active_test(test, result)
+  message_loop.set_unittests_running(True)
   message_loop_objc.add_quit_handler(output_result)
   test.run(result)
+  message_loop.set_unittests_running(False)
   if len(_output_ran) == 0:
     output_result()
   sys.exit(0)

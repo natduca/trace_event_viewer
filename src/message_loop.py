@@ -63,9 +63,15 @@ def is_main_loop_running():
 
 def init_main_loop():
   platform_message_loop.init_main_loop()
+
 def run_main_loop():
   platform_message_loop.run_main_loop()
 
-def quit_main_loop(quit_with_exception=False):
-  platform_message_loop.quit_main_loop(quit_with_exception)
+def quit_main_loop():
+  platform_message_loop.quit_main_loop()
 
+def set_unittests_running(running):
+  platform_message_loop.set_unittests_running(running)
+
+def set_active_test(test, result):
+  platform_message_loop.set_active_test(test, result)

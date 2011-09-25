@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import message_loop
 import optparse
 import os
 import platform
@@ -104,19 +105,6 @@ def main(parser):
     import browser
     browser.debug_mode = True
 
-  else:
-    def hook(exc, value, tb):
-      import traceback
-      if not str(value).startswith("_noprint"):
-        traceback.print_exception(exc, value, tb)
-      import src.message_loop
-      if src.message_loop.is_main_loop_running():
-        if not str(value).startswith("_noprint"):
-          print "Untrapped exception! Exiting message loop with exception."
-        src.message_loop.quit_main_loop(quit_with_exception=True)
-
-    sys.excepthook = hook
-
   # make sure cwd is the base directory!
   os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
@@ -127,11 +115,14 @@ def main(parser):
 
   r = unittest.TextTestRunner()
   if not options.incremental:
+    message_loop.set_unittests_running(True)
     res = r.run(suites)
+    message_loop.set_unittests_running(False)
     if res.wasSuccessful():
       return 0
     return 255
   else:
+    message_loop.set_unittests_running(True)
     ok = True
     for s in suites:
       if isinstance(s, unittest.TestSuite):
@@ -151,6 +142,7 @@ def main(parser):
           ok = False
           if options.stop_on_error:
             break
+    message_loop.set_unittests_running(False)
     if ok:
       return 0
     return 255

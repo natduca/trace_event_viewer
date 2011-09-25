@@ -14,19 +14,48 @@
 import wx
 import wx.webkit
 import sys
+import traceback
+import unittest
 
+_hooked = False
 _app = None
 _current_main_loop_instance = 0
-_raise_exception_after_quit = False
+_wx_frame = None # keeps the message loop alive when there aren't any other frames :'(
+
+_pending_tasks_timer = None
+_pending_tasks = []
+_unittests_running = False
+_active_test_result = None
+_active_test = None
 
 def init_main_loop():
+  global _hooked
+  if not _hooked:
+    _hooked = True
+    old_hook = sys.excepthook
+    def hook(exc, value, tb):
+      if is_main_loop_running() and _active_test:
+        if isinstance(value,unittest.TestCase.failureException):
+          _active_test_result.addFailure(_active_test, (exc, value, tb))
+        else:
+          if not str(value).startswith("_noprint"):
+            print "Untrapped exception! Exiting message loop with exception."
+          _active_test_result.addError(_active_test, (exc, value, tb))
+        quit_main_loop()
+        return
+      else:
+        old_hook(exc, value, tb)
+        return
+    sys.excepthook = hook
+
   global _app
   if not _app:
     _app = wx.App(False)
     _app.SetAppName("TraceViewer")
 
-_pending_tasks_timer = None
-_pending_tasks = []
+    global _wx_frame
+    _wx_frame = wx.Frame(None, -1, "KeepMainLoopAlive");
+
 def _run_pending_tasks(e):
   pending = list(_pending_tasks)
   del _pending_tasks[:]
@@ -58,11 +87,15 @@ def post_delayed_task(cb, delay, *args):
   timer.Bind(wx.EVT_TIMER, on_run, timer)
   timer.Start(max(1,int(delay * 1000)), True)
 
-def _on_exception_while_in_main_loop(type, value, tb):
-    message = 'Uncaught exception:\n'
-    message += ''.join(traceback.format_exception(type, value, tb))
-    print message
-    quit_main_loop()
+def set_unittests_running(running):
+  global _unittests_running
+  _unittests_running = running
+
+def set_active_test(test, result):
+  global _active_test
+  global _active_test_result
+  _active_test = test
+  _active_test_result = result
 
 def is_main_loop_running():
   if not _app:
@@ -70,6 +103,8 @@ def is_main_loop_running():
   return _app.IsMainLoopRunning()
 
 def run_main_loop():
+  if _unittests_running and not _active_test:
+    raise Exception("UITestCase must be used for tests that use the message_loop.")
   global _app
   global _current_main_loop_instance
   global _pending_tasks_timer
@@ -77,9 +112,14 @@ def run_main_loop():
 
   try:
     _app.MainLoop()
+  except:
+    traceback.print_exc()
   finally:
     _current_main_loop_instance += 1
 
+  global _wx_frame
+  _wx_frame.Destroy()
+  _wx_frame = None
   for w in wx.GetTopLevelWindows():
     w.Destroy()
   _app.Destroy()
@@ -89,15 +129,7 @@ def run_main_loop():
     _pending_tasks_timer = None
   _app = None
 
-  global _raise_exception_after_quit
-  if _raise_exception_after_quit:
-    _raise_exception_after_quit = False
-    raise Exception("An exception occured while running main loop.")
-
-def quit_main_loop(quit_with_exception):
-  global _raise_exception_after_quit
-  if quit_with_exception:
-    _raise_exception_after_quit = True
+def quit_main_loop():
   global _current_main_loop_instance
   _current_main_loop_instance += 1
   _app.ExitMainLoop()

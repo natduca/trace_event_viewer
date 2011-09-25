@@ -35,6 +35,10 @@ class _TestThatFailsWhenRun(UITestCase):
   def test(self):
     self.assertEquals(True, False)
 
+class _TestThatRaisesWhenRun(UITestCase):
+  def test(self):
+    raise Exception("Generic error")
+
 class _TestThatSucceedsInsideMessageLoop(UITestCase):
   def test(self):
     def go():
@@ -47,7 +51,13 @@ class _TestThatFailsInsideMessageLoop(UITestCase):
   def test(self):
     def go():
       self.assertEquals(False, True)
-      message_loop.quit_main_loop()
+    message_loop.post_task(go)
+    message_loop.run_main_loop()
+
+class _TestThatRaisesInsideMessageLoop(UITestCase):
+  def test(self):
+    def go():
+      raise Exception("_noprint Generic error")
     message_loop.post_task(go)
     message_loop.run_main_loop()
 
@@ -66,7 +76,13 @@ class UITestCaseTest(unittest.TestCase):
     self.assertEquals(1, len(result.failures))
     self.assertEquals(0, len(result.errors))
 
-
+  def test_that_raises_when_run(self):
+    test = _TestThatRaisesWhenRun("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertFalse(result.wasSuccessful())
+    self.assertEquals(0, len(result.failures))
+    self.assertEquals(1, len(result.errors))
 
   def test_that_succeeds_inside_message_loop(self):
     test = _TestThatSucceedsInsideMessageLoop("test")
@@ -86,3 +102,11 @@ class UITestCaseTest(unittest.TestCase):
     self.assertFalse(result.wasSuccessful())
     self.assertEquals(1, len(result.failures))
     self.assertEquals(0, len(result.errors))
+
+  def test_that_raises_inside_message_loop(self):
+    test = _TestThatRaisesInsideMessageLoop("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertFalse(result.wasSuccessful())
+    self.assertEquals(0, len(result.failures))
+    self.assertEquals(1, len(result.errors))
