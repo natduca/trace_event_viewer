@@ -43,6 +43,8 @@ class UITestCase(unittest.TestCase):
   def async_run_testcase(self, result):
     result.startTest(self)
     testMethod = getattr(self, self._method_name)
+    self._num_failures_at_start = len(result.failures)
+    self._num_errors_at_start = len(result.errors)
 
     try:
       self.setUp()
@@ -50,7 +52,7 @@ class UITestCase(unittest.TestCase):
       raise
     except:
       result.addError(self, self._exc_info())
-      self.async_teardown_and_stop_test(result)
+      self.async_teardown_and_stop_test(result,tearDown=False)
       return
 
     ok = False
@@ -72,18 +74,23 @@ class UITestCase(unittest.TestCase):
     message_loop.add_quit_handler(do_async_teardown_and_stop_test)
 
 
-  def async_teardown_and_stop_test(self, result):
+  def async_teardown_and_stop_test(self, result, tearDown=True):
     try:
-      try:
-        self.tearDown()
-      except KeyboardInterrupt:
-        raise
-      except:
-        result.addError(self, self._exc_info())
-        ok = False
-        if ok: result.addSuccess(self)
+      if len(result.failures) == self._num_failures_at_start and len(result.errors) == self._num_errors_at_start:
+        result.addSuccess(self)
+      
+      if tearDown:
+        try:
+          self.tearDown()
+        except KeyboardInterrupt:
+          raise
+        except:
+          result.addError(self, self._exc_info())
+          ok = False
+          if ok: result.addSuccess(self)
     finally:
        result.stopTest(self)
+       message_loop.quit_main_loop()
 
 
   def run_darwin(self, testResult):

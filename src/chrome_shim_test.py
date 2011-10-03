@@ -42,7 +42,7 @@ class ChromeShimTest(UITestCase):
     self.shim.add_event_listener('foo2', self.on_foo2)
     message_loop.post_delayed_task(self.on_timeout, DEFAULT_TIMEOUT)
 
-  def tearDown():
+  def tearDown(self):
     if hasattr(self, 'host'):
       if self.host:
         self.host.close() # prevent host from leaking its daemon
