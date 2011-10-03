@@ -127,23 +127,32 @@ def run_main_loop():
   finally:
     _current_main_loop_instance += 1
 
-  global _wx_frame
-  _wx_frame.Destroy()
-  _wx_frame = None
-  for w in wx.GetTopLevelWindows():
-    w.Destroy()
+  global _app
   _app.Destroy()
-  del _pending_tasks[:]
-  if _pending_tasks_timer:
-    _pending_tasks_timer.Destroy()
-    _pending_tasks_timer = None
   _app = None
-
-  for cb in _quit_handlers:
-    cb()
-  del _quit_handlers[:]
 
 def quit_main_loop():
   global _current_main_loop_instance
   _current_main_loop_instance += 1
-  _app.ExitMainLoop()
+
+  def do_quit():
+    global _wx_frame
+    _wx_frame.Destroy()
+    _wx_frame = None
+    for w in wx.GetTopLevelWindows():
+      w.Destroy()
+
+    del _pending_tasks[:]
+
+    global _pending_tasks_timer
+    if _pending_tasks_timer:
+      _pending_tasks_timer.Destroy()
+      _pending_tasks_timer = None
+
+    for cb in _quit_handlers:
+      cb()
+    del _quit_handlers[:]
+
+    _app.ExitMainLoop()
+
+  post_task(do_quit)
