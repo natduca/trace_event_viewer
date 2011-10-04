@@ -22,6 +22,7 @@ _current_main_loop_instance = 0
 _unittests_running = False
 _active_test_result = None
 _active_test = None
+_quitting = False
 _quit_handlers = []
 
 def init_main_loop():
@@ -98,12 +99,28 @@ def run_main_loop():
     _is_main_loop_running = False
     _current_main_loop_instance += 1
 
-  for w in gtk.window_list_toplevels():
-    w.destroy()
+  global _quitting
+  _quitting = False
 
-  for cb in _quit_handlers:
-    cb()
-  del _quit_handlers[:]
 
 def quit_main_loop():
-  gtk.main_quit()
+  assert is_main_loop_running()
+
+  global _quitting
+  if _quitting:
+    return
+  _quitting = True
+
+  def do_quit():
+    global _current_main_loop_instance
+    _current_main_loop_instance += 1
+
+    for w in gtk.window_list_toplevels():
+      w.destroy()
+
+    for cb in _quit_handlers:
+      cb()
+    del _quit_handlers[:]
+
+    gtk.main_quit()
+  post_task(do_quit)
