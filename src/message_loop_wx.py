@@ -150,8 +150,6 @@ def quit_main_loop():
     if _wx_frame:
       _wx_frame.Destroy()
       _wx_frame = None
-    for w in wx.GetTopLevelWindows():
-      w.Destroy()
 
     global _pending_tasks_timer
     if _pending_tasks_timer:
