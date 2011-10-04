@@ -17,23 +17,23 @@ import sys
 import wx
 import wx.webkit
 
-class BrowserWx(wx.Frame,browser.BrowserBase):
+class BrowserWx(browser.BrowserBase):
   def __init__(self):
+    self._frame = wx.Frame(None, -1, "TraceViewer",size=browser.default_size)
     message_loop.init_main_loop()
-    wx.Frame.__init__(self, None, -1, "TraceViewer",size=browser.default_size)
     browser.BrowserBase.__init__(self)
 
-    self._webview  = wx.webkit.WebKitCtrl(self, -1)
-    self._debug_ctrl = wx.TextCtrl(self, -1, "")
-    self.Bind(wx.EVT_TEXT_ENTER, self.on_evt_debug_enter, self._debug_ctrl)
-    self.Bind(wx.EVT_CHAR_HOOK, self.on_evt_char)
-    self.Bind(wx.EVT_CLOSE, self.on_evt_close)
+    self._webview  = wx.webkit.WebKitCtrl(self._frame, -1)
+    self._debug_ctrl = wx.TextCtrl(self._frame, -1, "")
+    self._frame.Bind(wx.EVT_TEXT_ENTER, self.on_evt_debug_enter, self._debug_ctrl)
+    self._frame.Bind(wx.EVT_CHAR_HOOK, self.on_evt_char)
+    self._frame.Bind(wx.EVT_CLOSE, self.on_evt_close)
 
     outer_sizer = wx.BoxSizer(wx.VERTICAL)
     outer_sizer.Add(self._webview, 1, wx.ALL | wx.EXPAND)
     outer_sizer.Add(self._debug_ctrl, 0, wx.ALL | wx.EXPAND | wx.TOP, 8)
 
-    self.SetSizer(outer_sizer)
+    self._frame.SetSizer(outer_sizer)
 
     if browser.debug_mode:
       self._debug_ctrl.Show()
@@ -42,16 +42,17 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
     self._closed = False
 
   def close(self):
-    self._closed = True
-    self.Destroy()
+    if self._frame:
+      self._frame.Destroy()
+      self._frame = None
 
   def on_evt_close(self, e):
-    self._closed = True
-    self.Destroy()
+    self._frame.Destroy()
+    self._frame = None
     message_loop.quit_main_loop()
     
   def on_evt_char(self, e):
-    if self.FindFocus() == self._debug_ctrl:
+    if self._frame.FindFocus() == self._debug_ctrl:
       if e.GetKeyCode() == 13:
         self.on_evt_debug_enter(e)
         return
@@ -79,7 +80,7 @@ class BrowserWx(wx.Frame,browser.BrowserBase):
     return self._webview.RunScript(cmd)
 
   def show(self):
-    self.Show()
+    self._frame.Show()
 
 """Alias for BrowserWx"""
 Browser = BrowserWx
