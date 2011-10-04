@@ -103,7 +103,6 @@ def main(main_name):
         sys.argv.remove('--triedarch')
       except:
         pass
-      print "At", os.getcwd()
       import src
       sys.argv.insert(1, '--main-name')
       sys.argv.insert(2, main_name)
