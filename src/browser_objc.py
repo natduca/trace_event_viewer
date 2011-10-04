@@ -22,7 +22,7 @@ from WebKit import *
 class BrowserObjc(NSWindow,browser.BrowserBase):
   def init(self):
     message_loop.init_main_loop()
-    size = NSMakeRect(0,0,800,600)
+    size = NSMakeRect(0,0,browser.default_size[0],browser.default_size[1])
     NSWindow.initWithContentRect_styleMask_backing_defer_(
       self,
       size,
