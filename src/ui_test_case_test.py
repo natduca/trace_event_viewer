@@ -47,7 +47,7 @@ class _TestThatRaisesInsideMessageLoop(UITestCase):
     message_loop.post_task(go)
 
 class UITestCaseTest(unittest.TestCase):
-  def test_that_succeeds_inside_message_loop(self):
+  def test_test_that_succeeds_inside_message_loop(self):
     test = _TestThatSucceedsInsideMessageLoop("test")
     result = unittest.TestResult()
     test.run(result)
@@ -58,7 +58,7 @@ class UITestCaseTest(unittest.TestCase):
         print e
     self.assertTrue(result.wasSuccessful())
 
-  def test_that_fails_inside_message_loop(self):
+  def test_test_that_fails_inside_message_loop(self):
     test = _TestThatFailsInsideMessageLoop("test")
     result = unittest.TestResult()
     test.run(result)
@@ -66,7 +66,7 @@ class UITestCaseTest(unittest.TestCase):
     self.assertEquals(1, len(result.failures))
     self.assertEquals(0, len(result.errors))
 
-  def test_that_raises_inside_message_loop(self):
+  def test_test_that_raises_inside_message_loop(self):
     test = _TestThatRaisesInsideMessageLoop("test")
     result = unittest.TestResult()
     test.run(result)
