@@ -115,9 +115,6 @@ def quit_main_loop():
     global _current_main_loop_instance
     _current_main_loop_instance += 1
 
-    for w in gtk.window_list_toplevels():
-      w.destroy()
-
     for cb in _quit_handlers:
       cb()
     del _quit_handlers[:]
