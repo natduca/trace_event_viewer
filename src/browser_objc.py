@@ -29,7 +29,7 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
       NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask,
       NSBackingStoreBuffered,
       False)
-    self.setTitle_("Hello world")
+    self.setTitle_("TraceViewer")
     self.contentView().setAutoresizesSubviews_(True)
 
     self._webview = WebView.new()
@@ -46,12 +46,11 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
 
   def load_url(self, url):
     self._loaded = False
-    print "loading", url
+    logging.debug("loading %s", url)
     self._webview.setMainFrameURL_(url)
 
   # frame load delegate methods
   def webView_didFinishLoadForFrame_(self, sender, frame):
-    print "didfinishloading"
     if frame == self._webview.mainFrame():
       logging.debug("Load finished")
       self._loaded = True
