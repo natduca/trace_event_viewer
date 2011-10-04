@@ -134,9 +134,19 @@ class UITestCase(unittest.TestCase):
       raise
     testResult.startTest(self)
     for e in childTestResult["errors"]:
-      testResult.errors.append((self, e)) # use this directly because addError treats the passed-in value as an exc_info
+      try:
+        raise UITestException(e)
+      except:
+        testResult.addError(self, sys.exc_info())
     for e in childTestResult["failures"]:
-      testResult.failures.append((self, e)) # use this directly because addFailure the passed-in value as an exc_info
+      try:
+        raise UITestException(e)
+      except:
+        testResult.addFailure(self, sys.exc_info())
+
+    if len(childTestResult["failures"]) == 0 and len(childTestResult["errors"]) == 0:
+      testResult.addSuccess(self)
+
     if childTestResult["shouldStop"]:
       testResult.stop()
     testResult.stopTest(self)
