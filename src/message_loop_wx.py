@@ -37,6 +37,7 @@ def init_main_loop():
     def hook(exc, value, tb):
       if is_main_loop_running() and _active_test:
         if isinstance(value,unittest.TestCase.failureException):
+          print "hook"
           _active_test_result.addFailure(_active_test, (exc, value, tb))
         else:
           if not str(value).startswith("_noprint"):
@@ -127,22 +128,30 @@ def run_main_loop():
   finally:
     _current_main_loop_instance += 1
 
-  global _app
+  del _pending_tasks[:]
+
   _app.Destroy()
   _app = None
 
+  global _quitting
+  _quitting = False
+
+_quitting = False
 def quit_main_loop():
   global _current_main_loop_instance
   _current_main_loop_instance += 1
+  global _quitting
+  if _quitting:
+    return
+  _quitting = True
 
   def do_quit():
     global _wx_frame
-    _wx_frame.Destroy()
-    _wx_frame = None
+    if _wx_frame:
+      _wx_frame.Destroy()
+      _wx_frame = None
     for w in wx.GetTopLevelWindows():
       w.Destroy()
-
-    del _pending_tasks[:]
 
     global _pending_tasks_timer
     if _pending_tasks_timer:
