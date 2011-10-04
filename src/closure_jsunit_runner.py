@@ -31,27 +31,28 @@ DEFAULT_TIMEOUT = 10
 class ClosureJSUnitRunner(UITestCase):
   """This class runs a test built on Google Closure's goog.testing.jsunit"""
   def go(self, test_path, timeout = DEFAULT_TIMEOUT):
-    self._drop_timeout = False
-    self.test_path = test_path
-    global _fer
     self.host = None
-    try:
-      if not _fer:
-        _fer = frontend_resources.FrontendResources()
-      self.host = frontend_daemon_host.FrontendDaemonHost(23252, _fer.dir_mappings)
-      self.browser = browser.Browser()
-      u = urllib.basejoin(self.host.baseurl, self.test_path)
-      self.browser.load_url(u)
-      self.browser.show()
-      message_loop.post_delayed_task(self.on_tick, POLL_RATE)
-      message_loop.post_delayed_task(self.on_timeout, timeout)
-      message_loop.run_main_loop()
-    finally:
-      if self.host:
-        self.host.close() # prevent host from leaking its daemon
+    self.test_path = test_path
+    self._drop_timeout = False
+
+    global _fer
+    if not _fer:
+      _fer = frontend_resources.FrontendResources()
+
+    self.host = frontend_daemon_host.FrontendDaemonHost(23252, _fer.dir_mappings)
+    self.browser = browser.Browser()
+    u = urllib.basejoin(self.host.baseurl, self.test_path)
+    self.browser.load_url(u)
+    self.browser.show()
+    message_loop.post_delayed_task(self.on_tick, POLL_RATE)
+    message_loop.post_delayed_task(self.on_timeout, timeout)
+
+  def tearDown(self):
+    if hasattr(self, "host") and self.host:
+      self.host.close() # prevent host from leaking its daemon
 
   def on_tick(self):
-    # check for gtest existing... BE CAREFUL --- wxpython crashes if it gets
+    # check for gtest existing
     gtest_exists = self.browser.run_javascript("(window['G_testRunner'] !== undefined)") == 'true'
     if gtest_exists:
       # check for status

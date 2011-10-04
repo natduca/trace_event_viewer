@@ -12,16 +12,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from closure_jsunit_runner import *
+import unittest
 
-class ClosureJSUnitTestRunnerTest(ClosureJSUnitRunner):
-  def test_timeout_successfully(self):
-    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test_timeout.html",timeout=0.5))
+class _TestThatTimesOut(ClosureJSUnitRunner):
+  def test(self):
+    self.go("/src/closure_jsunit_runner_test_timeout.html",timeout=0.5)
 
-  def test_fails_successfully(self):
-    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_fails"))
+class _TestThatFails(ClosureJSUnitRunner):
+  def test(self):
+    self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_fails")
 
-  def test_raise_throws(self):
-    self.assertRaises(Exception, lambda: self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_throws"))
+class _TestThatThrows(ClosureJSUnitRunner):
+  def test(self):
+    self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_throws")
 
-  def test_succeeds_successfully(self):
+class _TestThatSucceeds(ClosureJSUnitRunner):
+  def test(self):
     self.go("/src/closure_jsunit_runner_test.html?runTests=test_that_succeeds")
+
+class ClosureJSUnitRunnerTest(unittest.TestCase):
+  def test_test_that_times_out(self):
+    test = _TestThatTimesOut("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertFalse(result.wasSuccessful())
+    self.assertEquals(0, len(result.failures))
+    self.assertEquals(1, len(result.errors))
+
+  def test_test_that_fails(self):
+    test = _TestThatFails("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertFalse(result.wasSuccessful())
+    # FIXME: Right now, JSUnit failures are reported the same as errors.
+    self.assertEquals(0, len(result.failures))
+    self.assertEquals(1, len(result.errors))
+
+  def test_test_that_throws(self):
+    test = _TestThatThrows("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertFalse(result.wasSuccessful())
+    self.assertEquals(0, len(result.failures))
+    self.assertEquals(1, len(result.errors))
+
+  def test_test_that_succeeds(self):
+    test = _TestThatSucceeds("test")
+    result = unittest.TestResult()
+    test.run(result)
+    self.assertTrue(result.wasSuccessful())
