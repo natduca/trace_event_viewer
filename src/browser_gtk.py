@@ -18,7 +18,7 @@ import sys
 import gtk
 import webkit
 
-class BrowserGtk(gtk.Window,browser.BrowserBase):
+class BrowserGtk(gtk.Window, browser.BrowserBase):
   def __init__(self):
     message_loop.init_main_loop()
     gtk.Window.__init__(self)
