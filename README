@@ -1,8 +1,9 @@
-trace_event is a standalone version of Chrome's about:tracing. Should work
-on OSX and Linux.
+trace_event is a standalone version of Chrome's about:tracing UI for viewing
+multithreaded performance traces. Works on OSX and Linux.
 
 To generate traces viewable by this tool, consider using:
 - https://github.com/natduca/py_trace_event
+
 
 The trace files that trace_viewer understands are insanely simple, so it is
 pretty easy to hack up your favorite system to produce them.
@@ -25,8 +26,11 @@ Linux:
         python-webkit
 
 OSX:
-        http://www.wxpython.org/download.php#stable
-        wxPython 2.8-osx-unicode-2.6
+        Either http://www.wxpython.org/download.php#stable
+               wxPython 2.8-osx-unicode-2.6
+
+        Or run with --objc to enable the [beta quality] PyObjC-based GUI
+
 
 Windows: Should be possible, but I've got to remove dependencies on
          SVN and things like 'rm' and 'cp'
