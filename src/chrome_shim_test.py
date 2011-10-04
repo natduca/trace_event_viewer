@@ -43,9 +43,10 @@ class ChromeShimTest(UITestCase):
     message_loop.post_delayed_task(self.on_timeout, DEFAULT_TIMEOUT)
 
   def tearDown(self):
-    if hasattr(self, 'host'):
-      if self.host:
-        self.host.close() # prevent host from leaking its daemon
+    if hasattr(self, 'host') and self.host:
+      self.host.close() # prevent host from leaking its daemon
+    if hasattr(self, 'browser') and self.browser:
+      self.browser.close()
 
   def on_foo1(self):
     self.got_foo1 = True
@@ -62,6 +63,3 @@ class ChromeShimTest(UITestCase):
   def on_timeout(self):
     raise Exception("Test %s timed out" % self.test_path)
 
-  def cleanUp(self):
-    if self.host:
-      self.host.close() # prevent host from leaking its daemon

@@ -51,6 +51,9 @@ class ClosureJSUnitRunner(UITestCase):
     if hasattr(self, "host") and self.host:
       self.host.close() # prevent host from leaking its daemon
 
+    if hasattr(self, "browser") and self.browser:
+      self.browser.close()
+
   def on_tick(self):
     # check for gtest existing
     gtest_exists = self.browser.run_javascript("(window['G_testRunner'] !== undefined)") == 'true'
@@ -82,6 +85,3 @@ class ClosureJSUnitRunner(UITestCase):
     else:
       raise Exception("Test %s timed out" % self.test_path)
 
-  def cleanUp(self):
-    if self.host:
-      self.host.close() # prevent host from leaking its daemon
