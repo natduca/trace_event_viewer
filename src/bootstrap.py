@@ -26,7 +26,7 @@ def run():
 
   mod = __import__(main_name, {}, {}, True)
   parser = optparse.OptionParser(usage=mod.main_usage())
-  parser.add_option('--objc', action="store_true", dest="objc", help="Enable objc supoprt")
+  parser.add_option('--objc', action="store_true", dest="objc", help="Enable objc support")
   parser.add_option(
       '-v', '--verbose', action='count', default=0,
       help='Increase verbosity level (repeat as needed)')
