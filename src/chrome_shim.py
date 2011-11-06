@@ -25,6 +25,8 @@ class ChromeShim(object):
     self._loaded = False
     self._commands_to_run_when_loaded = []
 
+    self.add_event_listener("console.log", self._on_console_log)
+
   def add_command_when_loaded(self, cb, *args):
     """Adds a command to run when the shim is active."""
     if self._loaded:
@@ -69,3 +71,7 @@ class ChromeShim(object):
             print "Unrecognized message from chrome.send: %s" % send["msg"]
     finally:
       message_loop.post_delayed_task(self.on_tick, POLL_INTERVAL)
+
+  def _on_console_log(self, args):
+    print "console: ", args
+

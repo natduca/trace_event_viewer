@@ -75,6 +75,15 @@ def main(parser):
       fer = frontend_resources.FrontendResources()
     host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
 
+    # Write trace_data to the data dir then load via XHR.  That is a more
+    # reliable way of loading traces, it turns out.
+    load_via_url = True
+    if load_via_url:
+      fn = os.path.join(fer.data_dir, "file")
+      f = open(fn, 'w')
+      f.write(trace_data)
+      f.close()
+
     def do_init():
       b = browser.Browser()
       shim = chrome_shim.ChromeShim(b)
@@ -85,7 +94,14 @@ def main(parser):
           res = b.run_javascript("loadTrace(JSON.parse('%s'))" % trace_data);
           if res != 'true':
             raise Exception('LoadTrace failed with %s', res)
-        shim.add_event_listener('ready', do_load)
+        def do_load_via_url():
+          res = b.run_javascript("loadTraceFromURL('/data/file')");
+          if res != 'true':
+            raise Exception('LoadTrace failed with %s', res)
+        if load_via_url:
+          shim.add_event_listener('ready', do_load_via_url)
+        else:
+          shim.add_event_listener('ready', do_load)
     message_loop.post_task(do_init)
     message_loop.run_main_loop()
   finally:

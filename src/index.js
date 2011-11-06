@@ -23,6 +23,17 @@ var g_timelineView;
     chrome.send('ready');
   }
 
+  function loadTraceFromURL(url) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.send(null);
+    if (req.status != 200)
+      throw "Load failed"
+    var resp = JSON.parse(req.responseText);
+    loadTrace(resp);
+    return true;
+  }
+
   function loadTrace(trace) {
     if (timelineView == undefined)
       throw Error('timelineview is null');
@@ -39,6 +50,7 @@ var g_timelineView;
     return true;
   }
 
+  window.loadTraceFromURL = loadTraceFromURL;
   window.loadTrace = loadTrace;
   document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 })();

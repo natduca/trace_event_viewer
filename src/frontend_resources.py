@@ -15,6 +15,7 @@ import chrome_svn_checkout
 import deps
 import os
 import sys
+import tempfile
 
 class FrontendResources():
   def __init__(self, chrome_dir=None):
@@ -24,6 +25,8 @@ class FrontendResources():
     else:
       self.chrome_checkout = chrome_svn_checkout.ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
       self.chrome_dir = self.chrome_checkout.data_dir
+
+    self.data_dir = tempfile.mkdtemp()
 
     # make sure we can find es5 shim
     self.es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
@@ -51,9 +54,15 @@ class FrontendResources():
     return {
         "/src" : self.src_dir,
         "/chrome" : self.chrome_dir,
-        "/es5-shim" : self.es5shim_dir
+        "/es5-shim" : self.es5shim_dir,
+        "/data": self.data_dir,
         }
 
   def close(self):
     if self.chrome_checkout:
       self.chrome_checkout.close()
+    if self.data_dir:
+      for e in os.dir(self.data_dir):
+        p = os.path.join(self.data_dir, e)
+        os.remove(p)
+      os.rmdir(self.data_dir)

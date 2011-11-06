@@ -43,4 +43,15 @@ if (!window["chrome"]) {
   };
 
   window.chrome = new _ChromeShim();
+
+  if (!window.console)
+    window.console = {}
+
+//  if (!window.console.log)
+  window.console.log = function() {
+    var z = [];
+    for (var i = 0; i < arguments.length; ++i)
+      z.push(arguments[i].toString());
+    chrome.send('console.log', [z.join(" ")]);
+  };
 }
