@@ -46,21 +46,10 @@ def main(parser):
     return 255
   trace_data = open(args[0]).read()
 
-  # detect array formats
-  if trace_data.startswith('['):
-    trace_data = trace_data.strip()
-    if trace_data.endswith(']'):
-      trace_data = """{"traceEvents": %s}""" % trace_data
-    else:
-      # its an array, but the close ] is missing, which we allow
-      trace_data = """{"traceEvents": %s]}""" % trace_data      
-  if trace_data.find('\n') != -1:
-    trace_data = trace_data.replace('\n', '')
-
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
     ok = True
-    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/gpu_internals.html"))
+    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/gpu_internals/gpu_internals.html"))
     ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/shared/js/cr.js"))
     if not ok:
       print "--chrome should point to the base chrome 'src' directory"
@@ -77,12 +66,10 @@ def main(parser):
 
     # Write trace_data to the data dir then load via XHR.  That is a more
     # reliable way of loading traces, it turns out.
-    load_via_url = True
-    if load_via_url:
-      fn = os.path.join(fer.data_dir, "file")
-      f = open(fn, 'w')
-      f.write(trace_data)
-      f.close()
+    fn = os.path.join(fer.data_dir, "file")
+    f = open(fn, 'w')
+    f.write(trace_data)
+    f.close()
 
     def do_init():
       b = browser.Browser()
@@ -90,18 +77,11 @@ def main(parser):
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
       if len(args) == 1:
-        def do_load():
-          res = b.run_javascript("loadTrace(JSON.parse('%s'))" % trace_data);
-          if res != 'true':
-            raise Exception('LoadTrace failed with %s', res)
         def do_load_via_url():
           res = b.run_javascript("loadTraceFromURL('/data/file')");
           if res != 'true':
             raise Exception('LoadTrace failed with %s', res)
-        if load_via_url:
-          shim.add_event_listener('ready', do_load_via_url)
-        else:
-          shim.add_event_listener('ready', do_load)
+        shim.add_event_listener('ready', do_load_via_url)
     message_loop.post_task(do_init)
     message_loop.run_main_loop()
   finally:

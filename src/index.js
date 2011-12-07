@@ -8,6 +8,8 @@ var g_timelineView;
   };
   include("/chrome/tracing/overlay.js");
   include("/chrome/tracing/timeline_model.js");
+  include("/chrome/tracing/linux_perf_importer.js");
+  include("/chrome/tracing/trace_event_importer.js");
   include("/chrome/tracing/sorted_array_utils.js");
   include("/chrome/tracing/measuring_stick.js");
   include("/chrome/tracing/timeline.js");
@@ -30,24 +32,15 @@ var g_timelineView;
     req.send(null);
     if (req.status != 200)
       throw "Load failed"
-    var resp = JSON.parse(req.responseText);
-    loadTrace(resp);
+    loadTrace(req.responseText);
     return true;
   }
 
-  function loadTrace(trace) {
+  function loadTrace(eventData) {
     if (timelineView == undefined)
       throw Error('timelineview is null');
 
-    // some old traces were just arrays without an outer object
-    if (!trace.traceEvents) {
-      if (trace instanceof Array)
-        timelineView.traceEvents = trace;
-      else
-        throw Error('trace does not have an events array');
-    } else {
-      timelineView.traceEvents = trace.traceEvents;
-    }
+    timelineView.traceData = eventData;
     return true;
   }
 
