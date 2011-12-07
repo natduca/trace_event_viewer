@@ -54,4 +54,33 @@ if (!window["chrome"]) {
       z.push(arguments[i].toString());
     chrome.send('console.log', [z.join(" ")]);
   };
+} else {
+  if (!window.chrome.send) {
+    window.chrome.send = function(msg, opt_args) {
+      console.log(msg, opt_args);
+    }
+  }
+}
+
+if (!window.webkitRequestAnimationFrame) {
+  window.webkitRequestAnimationFrame = function(fn, el) {
+    if (!el)
+      setTimeout(fn, 16);
+    else {
+      function isAttachedToDocument() {
+        var cur = el;
+        while (cur.parentNode)
+          cur = cur.parentNode;
+        return cur == el.ownerDocument;
+      }
+      function poll() {
+        if (!isAttachedToDocument()) {
+          setTimeout(poll, 16);
+          return;
+        }
+        fn(new Date().now);
+      }
+      setTimeout(poll, 16);
+    }
+  }
 }

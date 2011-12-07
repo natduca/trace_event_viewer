@@ -9,6 +9,7 @@ var g_timelineView;
   include("/chrome/tracing/overlay.js");
   include("/chrome/tracing/timeline_model.js");
   include("/chrome/tracing/sorted_array_utils.js");
+  include("/chrome/tracing/measuring_stick.js");
   include("/chrome/tracing/timeline.js");
   include("/chrome/tracing/timeline_track.js");
   include("/chrome/tracing/fast_rect_renderer.js");
