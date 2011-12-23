@@ -64,14 +64,18 @@ class ChromeSVNCheckout(object):
     try:
       if os.path.exists(dest) and os.path.isdir(dest):
         os.chdir(dest)
-        if self.svn_getrev(dest) == rev:
+        # svn_getrev returns -1 if an update might work and
+        # -2 if an update is hopeless and a clobber needs to happen.
+        cur_rev = self.svn_getrev(dest)
+        if cur_rev == rev:
           logging.debug('copy of %s is up-to-date' % url)
           return
-        logging.debug('updating copy of %s to %s' % (url, rev))
-        ret,msg = self.system2(['svn', 'update', '-r', str(rev)])
-        if ret == 0:
-          return
-        logging.warning(msg)
+        if cur_rev == -1:
+          logging.debug('updating copy of %s to %s' % (url, rev))
+          ret,msg = self.system2(['svn', 'update', '-r', str(rev)])
+          if ret == 0:
+            return
+          logging.warning(msg)
         logging.debug('  updating falied, clobbering and checking out')
       self.rm_rf(dest)
       self.svn_checkout(url, rev, dest)
@@ -92,6 +96,13 @@ class ChromeSVNCheckout(object):
       if not os.path.isdir(os.path.join(dest, ".svn")):
         return -1
       os.chdir(dest)
+
+      logging.debug('checking clean at %s' % (dest))
+      ret,res = self.system2(['svn', 'status', '.'])
+      if res != "":
+        logging.debug('tree dirty, no sane revision')
+        return -2
+
       logging.debug('checking rev at %s' % (dest))
       ret,res = self.system2(['svn', 'info', '.'])
       m = re.search("Revision: (\d+)", res)
@@ -110,7 +121,7 @@ class ChromeSVNCheckout(object):
       args = shlex.split(cmd)
     else:
       args = cmd
-    proc = subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=subprocess.PIPE)
     output = proc.communicate()[0]
     return (proc.returncode, output)
 
