@@ -12,8 +12,13 @@ found in the LICENSE file.
   -webkit-user-select: none;
 }
 
-html, body, #timeline-view {
-  height: 100%;
+#timeline-view {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 body {
@@ -21,14 +26,6 @@ body {
   font-family: sans-serif;
   padding: 0;
   margin: 0;
-}
-
-#debug-div {
-  display: -webkit-box;
-  position: fixed;
-  top: 0px;
-  left: 50%;
-  border: 1px solid red;
 }
 
 tabbox tabpanels {
@@ -50,8 +47,6 @@ tabbox tabpanels {
 <title>Trace Event</title>
 </head>
 <body>
-  <div id="debug-div">
-  </div>
   <div id="timeline-view">
   </div>
 </body>
