@@ -83,7 +83,7 @@ class ChromeSVNCheckout(object):
       os.chdir(oldcwd)
 
   def svn_checkout(self, url, rev, dest):
-    logging.debug('checking out %s at %s' % (url, rev))
+    print 'Checking out %s at %s' % (url, rev)
     ret,res = self.system2(['svn', 'checkout', url, '-r', str(rev), dest])
     if ret != 0:
       raise Exception, res
