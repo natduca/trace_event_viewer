@@ -123,6 +123,7 @@ class FrontendDaemon(BaseHTTPServer.HTTPServer):
     self._is_running = True
     while self._is_running:
       self.try_handle_request(0.2)
+    self.server_close()
 
   def try_handle_request(self, delay):
     r, w, e = select.select([self], [], [], delay)
@@ -131,7 +132,6 @@ class FrontendDaemon(BaseHTTPServer.HTTPServer):
 
   def shutdown(self):
     self._is_running = False
-    self.server_close()
     return 1
 
 if __name__ == "__main__":
