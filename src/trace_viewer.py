@@ -49,7 +49,7 @@ def main(parser):
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
     ok = True
-    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/gpu_internals/gpu_internals.html"))
+    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/tracing/timeline.js"))
     ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/shared/js/cr.js"))
     if not ok:
       print "--chrome should point to the base chrome 'src' directory"
