@@ -23,6 +23,16 @@ class BrowserWx(browser.BrowserBase):
     message_loop.init_main_loop()
     browser.BrowserBase.__init__(self)
 
+    if sys.platform == 'darwin':
+      self._menu_bar = wx.MenuBar()
+      file_menu = wx.Menu()
+      self._menu_bar.Append(file_menu, "&File")
+      item = file_menu.Append(wx.ID_EXIT, "&Exit")
+
+      self._frame.Bind(wx.EVT_MENU, self.on_quit, item)
+
+      self._frame.SetMenuBar(self._menu_bar)
+
     self._webview  = wx.webkit.WebKitCtrl(self._frame, -1)
     self._debug_ctrl = wx.TextCtrl(self._frame, -1, "")
     self._frame.Bind(wx.EVT_TEXT_ENTER, self.on_evt_debug_enter, self._debug_ctrl)
@@ -40,6 +50,9 @@ class BrowserWx(browser.BrowserBase):
     else:
       self._debug_ctrl.Hide()
     self._closed = False
+
+  def on_quit(self, *args):
+    self.on_evt_close(None)
 
   def close(self):
     if self._frame:
