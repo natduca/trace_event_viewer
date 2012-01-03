@@ -17,7 +17,7 @@ import os
 import sys
 
 def main_usage():
-  return "Usage: %prog [options] trace_file"
+  return "Usage: %prog [options] trace_file1 [trace_file2 ...]"
 
 def main(parser):
   parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
