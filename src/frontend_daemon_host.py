@@ -24,6 +24,7 @@ import threading
 import time
 import urllib
 import urllib2
+import Queue
 
 def is_port_listening(port):
   import socket
@@ -41,15 +42,35 @@ class FrontendDaemonHostThread(threading.Thread):
     self._port = port
     self._resources = resources
     self._init_event = init_event
+    self._run = False
+    self._thread_commands = Queue.Queue()
 
   def run(self):
     self._daemon = frontend_daemon.FrontendDaemon("", self._port, self._resources)
     self._init_event.set()
 
-    self._daemon.serve_forever()
+    self._run = True
+    while self._run:
+      self._daemon.try_handle_request(0.2)
+      while True:
+        try:
+          cmd = self._thread_commands.get_nowait()
+        except Queue.Empty:
+          break
+        cmd[0](*cmd[1:])
+    self._daemon.server_close()
+
+  def add_mapped_path(self, mapbase, mapto):
+    completion = threading.Event()
+    self._thread_commands.put((self._add_mapped_path_on_thread, mapbase, mapto, completion))
+    completion.wait()
+
+  def _add_mapped_path_on_thread(self, mapbase, mapto, completion):
+    self._daemon.add_mapped_path(mapbase, mapto)
+    completion.set()
 
   def stop(self):
-    self._daemon.shutdown()
+    self._run = False
 
 class FrontendDaemonHost(object):
   def __init__(self, port, resources):
@@ -63,11 +84,13 @@ class FrontendDaemonHost(object):
     self._thread.start()
     init_event.wait()
 
-
   def close(self):
     self._thread.stop()
     self._thread.join()
     self._thread = None
+
+  def add_mapped_path(self, mapbase, mapto):
+    self._thread.add_mapped_path(mapbase, mapto)
 
   @property
   def host(self):

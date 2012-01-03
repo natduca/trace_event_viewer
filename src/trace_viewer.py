@@ -44,7 +44,7 @@ def main(parser):
   if len(args) == 0:
     print "Expected: trace_file."
     return 255
-  trace_data = open(args[0]).read()
+  trace_filename = args[0]
 
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
@@ -64,27 +64,22 @@ def main(parser):
       fer = frontend_resources.FrontendResources()
     host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
 
-    # Write trace_data to the data dir then load via XHR.  That is a more
-    # reliable way of loading traces, it turns out.
-    fn = os.path.join(fer.data_dir, "file")
-    f = open(fn, 'w')
-    f.write(trace_data)
-    f.close()
-
+    host.add_mapped_path("/file/0", trace_filename)
+    
     def do_init():
       b = browser.Browser()
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
-      if len(args) == 1:
-        def do_load_via_url():
-          res = b.run_javascript("loadTraceFromURL('/data/file')");
-          if res != 'true':
-            raise Exception('LoadTrace failed with %s', res)
-        shim.add_event_listener('ready', do_load_via_url)
+      def do_load_via_url():
+        res = b.run_javascript("loadTraceFromURL('/file/0')");
+        if res != 'true':
+          print 'LoadTrace failed with %s' % res
+          message_loop.quit_main_loop()
+      shim.add_event_listener('ready', do_load_via_url)
     message_loop.post_task(do_init)
     message_loop.run_main_loop()
   finally:
     if host:
-      host.close() # prevent host from leaking its daemon
+      host.close() # prevent host from leaking its thread
   return 0

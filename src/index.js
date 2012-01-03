@@ -31,7 +31,7 @@ var g_timelineView;
     req.open('GET', url, false);
     req.send(null);
     if (req.status != 200)
-      throw "Load failed"
+      throw 'Load failed, got status=' + req.status + ' on ' + url
     loadTrace(req.responseText);
     return true;
   }

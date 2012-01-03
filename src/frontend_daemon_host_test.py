@@ -66,6 +66,17 @@ class FrontendDaemonHostTest(unittest.TestCase):
     finally:
       os.chdir(oldcwd)
 
+  def test_host_add_mapped_dir(self):
+    self.test_data_dir = os.path.realpath(os.path.join(tempfile.gettempdir(), 'frontend_daemon_host_test'))
+    if os.path.exists(self.test_data_dir):
+      self.rm_rf(self.test_data_dir)
+    os.makedirs(self.test_data_dir)
+    self.write1('index.html')
+    self.host = FrontendDaemonHost(12345, {})
+    self.host.add_mapped_path('/foom/bar', os.path.join(self.test_data_dir, 'index.html'))
+    x = self.host.urlread("/foom/bar")
+    self.assertEquals('1\n', x)
+
   def tearDown(self):
     if self.host:
       self.host.close()

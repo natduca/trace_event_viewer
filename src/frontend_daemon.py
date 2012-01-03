@@ -68,7 +68,7 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       self.send(200, data, mimetype)
 
   def log_message(self, format, *args):
-    logging.debug(format, args)
+    logging.debug(format % args)
 
   def send(self, code, msg="",content_type="text/plain"):
     try:
@@ -82,24 +82,30 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       pass
 
 class FrontendDaemon(BaseHTTPServer.HTTPServer):
-  def __init__(self, host, port, mapped_dirs):
+  def __init__(self, host, port, mapped_paths):
     BaseHTTPServer.HTTPServer.__init__(self, (host, port), _RequestHandler)
     self._port = port
-    self._mapped_dirs = dict()
+    self._mapped_paths = dict()
     self._root_mappath = None
-    for p,d in mapped_dirs.items():
+    self._is_running = False
+    for p,d in mapped_paths.items():
       if p == "/":
         self._root_mappath = os.path.realpath(d)
       else:
-        self._mapped_dirs[p] = os.path.realpath(d)
+        self._mapped_paths[p] = os.path.realpath(d)
+
+  def add_mapped_path(self, mapbase, mapto):
+    self._mapped_paths[mapbase] = mapto
 
   def resolve_path(self, path):
     if path[0] != '/':
       return None
 
-    for mapbase,mapto in self._mapped_dirs.items():
+    for mapbase,mapto in self._mapped_paths.items():
       if path.find(mapbase) != 0:
         continue
+      if path == mapbase:
+        return mapto
       subpath = path[len(mapbase):]
       if subpath[0] != '/':
         continue
@@ -138,12 +144,12 @@ if __name__ == "__main__":
   port = int(sys.argv[1])
   rest = sys.argv[2:]
   if len(rest) % 2 != 0:
-    raise Exception("Must specify pairs of directories to map")
-  mapped_dirs = {}
+    raise Exception("Must specify pairs of paths to map")
+  mapped_paths = {}
   for i in range(len(rest) / 2):
     p = rest[2*i]
     d = rest[2*i + 1]
-    mapped_dirs[p] = d;
-  daemon = FrontendDaemon("", port, mapped_dirs)
+    mapped_paths[p] = d;
+  daemon = FrontendDaemon("", port, mapped_paths)
   daemon.serve_forever()
   sys.exit(0)
