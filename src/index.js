@@ -26,25 +26,30 @@ var g_timelineView;
     chrome.send('ready');
   }
 
-  function loadTraceFromURL(url) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, false);
-    req.send(null);
-    if (req.status != 200)
-      throw 'Load failed, got status=' + req.status + ' on ' + url
-    loadTrace(req.responseText);
-    return true;
+  function loadTracesFromURLs(urls) {
+    var traces = [];
+    for (var i = 0; i < urls.length; ++i) {
+      var req = new XMLHttpRequest();
+      req.open('GET', urls[i], false);
+      req.send(null);
+      if (req.status != 200)
+        throw 'Load failed, got status=' + req.status + ' on ' + urls[i]
+      traces.push(req.responseText);
+    }
+    return loadTraces(traces);
   }
 
-  function loadTrace(eventData) {
+  function loadTraces(events) {
     if (timelineView == undefined)
       throw Error('timelineview is null');
 
-    timelineView.traceData = eventData;
+    var m = new tracing.TimelineModel();
+    m.importEvents(events[0], true, events.slice(1));
+    timelineView.model = m;
     return true;
   }
 
-  window.loadTraceFromURL = loadTraceFromURL;
-  window.loadTrace = loadTrace;
+  window.loadTracesFromURLs = loadTracesFromURLs;
+  window.loadTraces = loadTraces;
   document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 })();

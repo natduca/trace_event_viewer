@@ -38,13 +38,9 @@ def main(parser):
   if options.debug:
     browser.debug_mode = True
 
-  if len(args) > 1:
-    print "Can only load one file at a time"
-    return 255
   if len(args) == 0:
     print "Expected: trace_file."
     return 255
-  trace_filename = args[0]
 
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
@@ -64,15 +60,20 @@ def main(parser):
       fer = frontend_resources.FrontendResources()
     host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
 
-    host.add_mapped_path("/file/0", trace_filename)
-    
+    load_args = []
+    for i in range(len(args)):
+      u = "/file/%i" % i
+      host.add_mapped_path(u, args[i])
+      load_args.append("'%s'" % u)
+
     def do_init():
       b = browser.Browser()
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
       def do_load_via_url():
-        res = b.run_javascript("loadTraceFromURL('/file/0')");
+        load_args_str = ', '.join(load_args)
+        res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str);
         if res != 'true':
           print 'LoadTrace failed with %s' % res
           message_loop.quit_main_loop()
