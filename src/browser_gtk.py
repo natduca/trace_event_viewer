@@ -100,9 +100,12 @@ class BrowserGtk(gtk.Window, browser.BrowserBase):
     # when you dont do this, it takes down WxPython completely.
     script = script.replace('"', '\\"')
     # reset the title first, then run the script inside an eval, inside a catch, inside a function.
-    cmd = """document.title = 'asdfasdfasdfasdfasdf'; document.title = (function() { var t = (((function() { try { return eval("%s;"); } catch(ex) { return ex; } })())); if (t === null) return 'null'; if (t === undefined) return 'undefined'; return t.toString(); })();""" % script
+    cmd = """document.title = (function() { var t = (((function() { try { return eval("%s;"); } catch(ex) { return ex; } })())); if (t === null) return 'null'; if (t === undefined) return 'undefined'; return t.toString(); })();""" % script
     prev_title_version = self._title_version
-    self._webview.execute_script(cmd) # this will change the title twice
+    # Reset the title first so we get something useful back.
+    self._webview.execute_script("document.title = 'asdfasdfasdfasdfasdf%i';" % self._title_version )
+    # Execute the command, which will change the title.
+    self._webview.execute_script(cmd)
     if self._title_version != prev_title_version + 2:
       logging.warn('run_javascript failed for %s', script)
       return None
