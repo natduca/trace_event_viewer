@@ -26,17 +26,60 @@ var g_timelineView;
     chrome.send('ready');
   }
 
+  function getAsync(url, cb, err_cb) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, true);
+    req.onreadystatechange = function(aEvt) {
+      if (req.readyState == 4) {
+        window.setTimeout(function() {
+          if (req.status == 200) {
+            cb(req.responseText);
+          } else {
+            console.log('Failed to load ' + url);
+            if (err_cb)
+              err_cb(req.status)
+          }
+        }, 0);
+      }
+    };
+    req.send(null);
+  }
+
   function loadTracesFromURLs(urls) {
     var traces = [];
+    var traces_outstanding = urls.length;
+    var failure = false;
     for (var i = 0; i < urls.length; ++i) {
-      var req = new XMLHttpRequest();
-      req.open('GET', urls[i], false);
-      req.send(null);
-      if (req.status != 200)
-        throw 'Load failed, got status=' + req.status + ' on ' + urls[i]
-      traces.push(req.responseText);
+      var i_ = i;
+      getAsync(urls[i_],
+               function(text) {
+                 traces[i_] = text;
+                 if(--traces_outstanding == 0)
+                   finalizeLoad();
+               },
+               function(status) {
+                   console.log( 'Load failed, got status=' + req.status + ' on ' + urls[i_]);
+                 failure = true;
+                 if(--traces_outstanding == 0)
+                   finalizeLoad();
+               });
     }
-    return loadTraces(traces);
+    function finalizeLoad() {
+      if (failure) {
+        chrome.send('loadTracesFromURLs_Failed');
+        return;
+      }
+      var ok;
+      try {
+        ok = loadTraces(traces);
+      } catch(err) {
+        ok = false;
+      }
+      if (!ok)
+        chrome.send('loadTracesFromURLs_Failed');
+      else
+        chrome.send('loadTracesFromURLs_Done');
+    }
   }
 
   function loadTraces(events) {

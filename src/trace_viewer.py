@@ -71,13 +71,23 @@ def main(parser):
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
+
       def do_load_via_url():
+        logging.debug('Loading traces')
         load_args_str = ', '.join(load_args)
-        res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str);
-        if res != 'true':
-          print 'LoadTrace failed with %s' % res
-          message_loop.quit_main_loop()
+        res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str)
+
+      def on_load_failed():
+        logging.error('Loading traces failed with %s' % res)
+        print 'LoadTrace failed with %s' % res
+        message_loop.quit_main_loop()
+
+      def on_load_done():
+        logging.debug('Loading traces done.')
+
       shim.add_event_listener('ready', do_load_via_url)
+      shim.add_event_listener('loadTracesFromURLs_Failed', on_load_failed)
+      shim.add_event_listener('loadTracesFromURLs_Done', on_load_done)
     message_loop.post_task(do_init)
     message_loop.run_main_loop()
   finally:
