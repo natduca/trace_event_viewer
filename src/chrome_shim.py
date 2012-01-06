@@ -37,9 +37,10 @@ class ChromeShim(object):
     self._commands_to_run_when_loaded.append(do_it)
 
   def _run_commands_to_run_when_loaded(self):
-    self._loaded = False
+    assert self._loaded
     for cb in self._commands_to_run_when_loaded:
       cb()
+    del self._commands_to_run_when_loaded[:]
 
   def add_event_listener(self, handler, cb, *args):
     def call_cb(*args):
