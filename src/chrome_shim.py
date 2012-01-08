@@ -14,6 +14,7 @@
 # limitations under the License.
 import json
 import message_loop
+from trace_event import *
 
 POLL_INTERVAL = 0.05
 
@@ -49,6 +50,7 @@ class ChromeShim(object):
       self._event_listeners[handler] = []
     self._event_listeners[handler].append(call_cb)
 
+  @tracedmethod
   def on_tick(self):
     try:
       # check for chrome_shim existing

@@ -25,6 +25,7 @@ import time
 import urllib
 import urllib2
 import Queue
+from trace_event import *
 
 def is_port_listening(port):
   import socket
@@ -51,20 +52,26 @@ class FrontendDaemonHostThread(threading.Thread):
 
     self._run = True
     while self._run:
-      self._daemon.try_handle_request(0.2)
-      while True:
-        try:
-          cmd = self._thread_commands.get_nowait()
-        except Queue.Empty:
-          break
-        cmd[0](*cmd[1:])
+      self._run_once()
     self._daemon.server_close()
 
+  @tracedmethod
+  def _run_once(self):
+    self._daemon.try_handle_request(0.2)
+    while True:
+      try:
+        cmd = self._thread_commands.get_nowait()
+      except Queue.Empty:
+        break
+      cmd[0](*cmd[1:])
+
+  @tracedmethod
   def add_mapped_path(self, mapbase, mapto):
     completion = threading.Event()
     self._thread_commands.put((self._add_mapped_path_on_thread, mapbase, mapto, completion))
     completion.wait()
 
+  @tracedmethod
   def _add_mapped_path_on_thread(self, mapbase, mapto, completion):
     self._daemon.add_mapped_path(mapbase, mapto)
     completion.set()
@@ -73,6 +80,8 @@ class FrontendDaemonHostThread(threading.Thread):
     self._run = False
 
 class FrontendDaemonHost(object):
+
+  @tracedmethod
   def __init__(self, port, resources):
     if is_port_listening(port):
       raise Exception("Cannot start, port %i in use." % port)
@@ -84,11 +93,13 @@ class FrontendDaemonHost(object):
     self._thread.start()
     init_event.wait()
 
+  @tracedmethod
   def close(self):
     self._thread.stop()
     self._thread.join()
     self._thread = None
 
+  @tracedmethod
   def add_mapped_path(self, mapbase, mapto):
     self._thread.add_mapped_path(mapbase, mapto)
 

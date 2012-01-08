@@ -2,5 +2,6 @@
 \#*#
 .#*
 *.swp
+*.trace
 third_party/chrome
 build

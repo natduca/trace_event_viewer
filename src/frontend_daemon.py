@@ -20,6 +20,7 @@ import time
 import urlparse
 import BaseHTTPServer
 import SimpleHTTPServer
+from trace_event import *
 
 PORT = 8080
 
@@ -28,6 +29,7 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def __init__(self,*args):
     SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self,*args)
 
+  @tracedmethod
   def do_GET(self):
     (_, _, path, _, _) = urlparse.urlsplit(self.path)
     if path == "":
@@ -70,6 +72,7 @@ class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def log_message(self, format, *args):
     logging.debug(format % args)
 
+  @tracedmethod
   def send(self, code, msg="",content_type="text/plain"):
     try:
       self.send_response(code)

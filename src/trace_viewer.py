@@ -16,13 +16,24 @@ import optparse
 import os
 import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../third_party/py_trace_event/"))
+try:
+  from trace_event import *
+except:
+  print "Could not find py_trace_event. Did you forget 'git submodule update --init'"
+  sys.exit(255)
+
 def main_usage():
   return "Usage: %prog [options] trace_file1 [trace_file2 ...]"
 
 def main(parser):
   parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Add UI for JS debugging')
+  parser.add_option('--trace', dest='trace', action='store_true', default=False, help='Records performance tracing information to %s.trace' % sys.argv[0])
   (options, args) = parser.parse_args()
+
+  if options.trace:
+    trace_enable("./%s.trace" % sys.argv[0])
 
   # these imports are held until the main function because we want to avoid side effects when
   # settings up the command line.
@@ -66,22 +77,26 @@ def main(parser):
       host.add_mapped_path(u, args[i])
       load_args.append("'%s'" % u)
 
+    @trace
     def do_init():
       b = browser.Browser()
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
 
+      @trace
       def do_load_via_url():
         logging.debug('Loading traces')
         load_args_str = ', '.join(load_args)
         res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str)
 
+      @trace
       def on_load_failed():
         logging.error('Loading traces failed with %s' % res)
         print 'LoadTrace failed with %s' % res
         message_loop.quit_main_loop()
 
+      @trace
       def on_load_done():
         logging.debug('Loading traces done.')
 
