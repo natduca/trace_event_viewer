@@ -23,6 +23,13 @@ def run():
   main_name = sys.argv[2]
   del sys.argv[1:3] # remove the --main-name argument
 
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../third_party/py_trace_event/"))
+  try:
+    import trace_event
+  except:
+    print "Could not find py_trace_event. Did you forget 'git submodule update --init'"
+    sys.exit(255)
+
 
   mod = __import__(main_name, {}, {}, True)
   parser = optparse.OptionParser(usage=mod.main_usage())

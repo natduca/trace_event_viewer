@@ -44,7 +44,6 @@ class FrontendDaemonHostThread(threading.Thread):
     self._resources = resources
     self._init_event = init_event
     self._run = False
-    self._thread_commands = Queue.Queue()
 
   def run(self):
     self._daemon = frontend_daemon.FrontendDaemon("", self._port, self._resources)
@@ -58,23 +57,6 @@ class FrontendDaemonHostThread(threading.Thread):
   @tracedmethod
   def _run_once(self):
     self._daemon.try_handle_request(0.2)
-    while True:
-      try:
-        cmd = self._thread_commands.get_nowait()
-      except Queue.Empty:
-        break
-      cmd[0](*cmd[1:])
-
-  @tracedmethod
-  def add_mapped_path(self, mapbase, mapto):
-    completion = threading.Event()
-    self._thread_commands.put((self._add_mapped_path_on_thread, mapbase, mapto, completion))
-    completion.wait()
-
-  @tracedmethod
-  def _add_mapped_path_on_thread(self, mapbase, mapto, completion):
-    self._daemon.add_mapped_path(mapbase, mapto)
-    completion.set()
 
   def stop(self):
     self._run = False
@@ -98,10 +80,6 @@ class FrontendDaemonHost(object):
     self._thread.stop()
     self._thread.join()
     self._thread = None
-
-  @tracedmethod
-  def add_mapped_path(self, mapbase, mapto):
-    self._thread.add_mapped_path(mapbase, mapto)
 
   @property
   def host(self):

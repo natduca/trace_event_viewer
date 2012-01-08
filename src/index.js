@@ -49,6 +49,7 @@ var g_timelineView;
     var traces = [];
     var traces_outstanding = urls.length;
     var failure = false;
+    var failureMessages = [];
     for (var i = 0; i < urls.length; ++i) {
       var i_ = i;
       getAsync(urls[i_],
@@ -58,15 +59,15 @@ var g_timelineView;
                    finalizeLoad();
                },
                function(status) {
-                   console.log( 'Load failed, got status=' + req.status + ' on ' + urls[i_]);
                  failure = true;
+                 failureMessages.push('Load failed, got status=' + req.status + ' on ' + urls[i_]);
                  if(--traces_outstanding == 0)
                    finalizeLoad();
                });
     }
     function finalizeLoad() {
       if (failure) {
-        chrome.send('loadTracesFromURLs_Failed');
+        chrome.send('loadTracesFromURLs_Failed', failureMessages);
         return;
       }
       var ok;
@@ -76,7 +77,7 @@ var g_timelineView;
         ok = false;
       }
       if (!ok)
-        chrome.send('loadTracesFromURLs_Failed');
+        chrome.send('loadTracesFromURLs_Failed', ["import failed"]);
       else
         chrome.send('loadTracesFromURLs_Done');
     }

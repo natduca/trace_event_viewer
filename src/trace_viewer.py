@@ -16,12 +16,7 @@ import optparse
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../third_party/py_trace_event/"))
-try:
-  from trace_event import *
-except:
-  print "Could not find py_trace_event. Did you forget 'git submodule update --init'"
-  sys.exit(255)
+from trace_event import *
 
 def main_usage():
   return "Usage: %prog [options] trace_file1 [trace_file2 ...]"
@@ -69,13 +64,15 @@ def main(parser):
       fer = frontend_resources.FrontendResources(options.chrome_path)
     else:
       fer = frontend_resources.FrontendResources()
-    host = frontend_daemon_host.FrontendDaemonHost(23252, fer.dir_mappings)
+    dir_mappings = dict(fer.dir_mappings)
 
     load_args = []
     for i in range(len(args)):
       u = "/file/%i" % i
-      host.add_mapped_path(u, args[i])
+      dir_mappings[u] = args[i]
       load_args.append("'%s'" % u)
+
+    host = frontend_daemon_host.FrontendDaemonHost(23252, dir_mappings)
 
     @trace
     def do_init():
@@ -91,7 +88,8 @@ def main(parser):
         res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str)
 
       @trace
-      def on_load_failed():
+      def on_load_failed(*args):
+        res = "[%s]" % "\n".join(args)
         logging.error('Loading traces failed with %s' % res)
         print 'LoadTrace failed with %s' % res
         message_loop.quit_main_loop()

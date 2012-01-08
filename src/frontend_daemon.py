@@ -24,7 +24,6 @@ from trace_event import *
 
 PORT = 8080
 
-
 class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def __init__(self,*args):
     SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self,*args)
@@ -96,9 +95,6 @@ class FrontendDaemon(BaseHTTPServer.HTTPServer):
         self._root_mappath = os.path.realpath(d)
       else:
         self._mapped_paths[p] = os.path.realpath(d)
-
-  def add_mapped_path(self, mapbase, mapto):
-    self._mapped_paths[mapbase] = mapto
 
   def resolve_path(self, path):
     if path[0] != '/':
