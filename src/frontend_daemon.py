@@ -20,9 +20,19 @@ import time
 import urlparse
 import BaseHTTPServer
 import SimpleHTTPServer
-from trace_event import *
 
-PORT = 8080
+if __name__ == "__main__":
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../third_party/py_trace_event/"))
+  try:
+    from trace_event import *
+  except:
+    print "Could not find py_trace_event. Did you forget 'git submodule update --init'"
+    sys.exit(255)
+  if sys.argv[1] == '--trace':
+    trace_enable("./%s.trace" % sys.argv[2])
+    del sys.argv[1:3]
+else:
+  from trace_event import *
 
 class _RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def __init__(self,*args):
