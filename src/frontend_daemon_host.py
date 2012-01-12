@@ -61,9 +61,10 @@ class FrontendDaemonHost(object):
     if trace_is_enabled():
       args.extend(["--trace", "./%s.trace" % sys.argv[2]])
     args.append(str(port))
-    for p,d in resources.items():
-      args.append(p)
-      args.append(d)
+    for mapbase,mapto in resources.items():
+      args.append(mapbase)
+      abs_mapto = os.path.abspath(mapto)
+      args.append(abs_mapto)
     self._daemon_proc = subprocess.Popen(args, cwd=topdir)
     try:
       self._wait_for_daemon_start()
