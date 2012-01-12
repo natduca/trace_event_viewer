@@ -13,4 +13,4 @@
 # limitations under the License.
 
 CHROME_SVN_BASE = 'http://src.chromium.org/svn/trunk/src/'
-CHROME_SVN_REV = 115171
+CHROME_SVN_REV = 116951
