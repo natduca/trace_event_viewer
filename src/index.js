@@ -60,7 +60,7 @@ var g_timelineView;
                },
                function(status) {
                  failure = true;
-                 failureMessages.push('Load failed, got status=' + req.status + ' on ' + urls[i_]);
+                 failureMessages.push('Load failed, got status=' + status + ' on ' + urls[i_]);
                  if(--traces_outstanding == 0)
                    finalizeLoad();
                });
