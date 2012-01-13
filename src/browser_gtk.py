@@ -22,6 +22,7 @@ class BrowserGtk(gtk.Window, browser.BrowserBase):
   def __init__(self):
     message_loop.init_main_loop()
     gtk.Window.__init__(self)
+    self.set_title("Trace Event Viewer")
     browser.BrowserBase.__init__(self)
 
     self.set_size_request(browser.default_size[0], browser.default_size[1])

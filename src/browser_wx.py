@@ -19,7 +19,7 @@ import wx.webkit
 
 class BrowserWx(browser.BrowserBase):
   def __init__(self):
-    self._frame = wx.Frame(None, -1, "TraceViewer",size=browser.default_size)
+    self._frame = wx.Frame(None, -1, "Trace Event Viewer",size=browser.default_size)
     message_loop.init_main_loop()
     browser.BrowserBase.__init__(self)
 
