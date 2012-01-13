@@ -51,19 +51,22 @@ var g_timelineView;
     var failure = false;
     var failureMessages = [];
     for (var i = 0; i < urls.length; ++i) {
-      var i_ = i;
-      getAsync(urls[i_],
-               function(text) {
-                 traces[i_] = text;
-                 if(--traces_outstanding == 0)
-                   finalizeLoad();
-               },
-               function(status) {
-                 failure = true;
-                 failureMessages.push('Load failed, got status=' + status + ' on ' + urls[i_]);
-                 if(--traces_outstanding == 0)
-                   finalizeLoad();
-               });
+      (function() {
+        var i_ = i;
+        getAsync(urls[i_],
+                 function(text) {
+                   traces[i_] = text;
+                   if(--traces_outstanding == 0)
+                     finalizeLoad();
+                 },
+                 function(status) {
+                   failure = true;
+                   failureMessages.push('Load failed, got status=' + status + ' on ' + urls[i_]);
+                   if(--traces_outstanding == 0)
+                     finalizeLoad();
+                 }
+                );
+      })();
     }
     function finalizeLoad() {
       if (failure) {
@@ -73,11 +76,14 @@ var g_timelineView;
       var ok;
       try {
         ok = loadTraces(traces);
+        if (!ok)
+          errMsg = "loadTraces failure of some other sort.";
       } catch(err) {
         ok = false;
+        errMsg = err;
       }
       if (!ok)
-        chrome.send('loadTracesFromURLs_Failed', ["import failed"]);
+        chrome.send('loadTracesFromURLs_Failed', ["import failed: " + errMsg]);
       else
         chrome.send('loadTracesFromURLs_Done');
     }
