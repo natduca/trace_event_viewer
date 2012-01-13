@@ -47,6 +47,10 @@ def main(parser):
   if len(args) == 0:
     print "Expected: trace_file."
     return 255
+  for a in args:
+    if not os.path.exists(a):
+      print "Trace file %s does not exist" % a
+      return 255
 
   if options.chrome_path:
     options.chrome_path = os.path.expanduser(options.chrome_path)
