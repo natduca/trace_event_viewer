@@ -92,7 +92,8 @@ def main(parser):
         res = "[%s]" % "\n".join(args)
         logging.error('Loading traces failed with %s' % res)
         print 'LoadTrace failed with %s' % res
-        message_loop.quit_main_loop()
+        if not options.debug:
+          message_loop.quit_main_loop()
 
       @trace
       def on_load_done():
