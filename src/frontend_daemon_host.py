@@ -38,22 +38,29 @@ class FrontendDaemonHost(object):
   @tracedmethod
   def __init__(self, port, resources):
     # If a daemon is running, try killing it via /kill
-    if is_port_listening(port):
-      for i in range(2):
-        logging.warning("Existing daemon found. Asking it to exit")
-        try:
-          conn = httplib.HTTPConnection('localhost', port, True)
-          conn.request('GET', '/exit')
-        except:
-          break
-        res = conn.getresponse()
-        if res.status != 200:
-          break
-        else:
-          time.sleep(0.2)
+    if port != 0:
+      if is_port_listening(port):
+        for i in range(2):
+          logging.warning("Existing daemon found. Asking it to exit")
+          try:
+            conn = httplib.HTTPConnection('localhost', port, True)
+            conn.request('GET', '/exit')
+          except:
+            break
+          res = conn.getresponse()
+          if res.status != 200:
+            break
+          else:
+            time.sleep(0.2)
 
-    if is_port_listening(port):
-      raise Exception("Daemon running")
+      if is_port_listening(port):
+        raise Exception("Daemon running")
+    else:
+      import socket
+      tmp = socket.socket()
+      tmp.bind(('', 0))
+      port = tmp.getsockname()[1]
+      tmp.close()
     self._port = port
 
     topdir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
