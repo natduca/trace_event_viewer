@@ -76,7 +76,12 @@ def main(parser):
       dir_mappings[u] = args[i]
       load_args.append("'%s'" % u)
 
-    host = frontend_daemon_host.FrontendDaemonHost(23252, dir_mappings)
+    if options.debug:
+      port = 23252
+    else:
+      port = 0
+    host = frontend_daemon_host.FrontendDaemonHost(port, dir_mappings)
+    logging.debug('Frontend daemon running on port %i' % host.port)
 
     @trace
     def do_init():
