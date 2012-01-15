@@ -135,10 +135,12 @@ class FrontendDaemon(BaseHTTPServer.HTTPServer):
     self.shutdown()
 
   def serve_forever(self):
-    self._is_running = True
-    while self._is_running:
-      self.try_handle_request(0.2)
-    self.server_close()
+    try:
+      self._is_running = True
+      while self._is_running:
+        self.try_handle_request(0.2)
+    finally:
+      self.server_close()
 
   def try_handle_request(self, delay):
     r, w, e = select.select([self], [], [], delay)
@@ -160,5 +162,9 @@ if __name__ == "__main__":
     d = rest[2*i + 1]
     mapped_paths[p] = d;
   daemon = FrontendDaemon("", port, mapped_paths)
-  daemon.serve_forever()
-  sys.exit(0)
+  try:
+    daemon.serve_forever()
+  except KeyboardInterrupt:
+    pass
+  finally:
+    sys.exit(0)
