@@ -83,20 +83,20 @@ def main(parser):
     host = frontend_daemon_host.FrontendDaemonHost(port, dir_mappings)
     logging.debug('Frontend daemon running on port %i' % host.port)
 
-    @trace
+    @traced
     def do_init():
       b = browser.Browser()
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
 
-      @trace
+      @traced
       def do_load_via_url():
         logging.debug('Loading traces')
         load_args_str = ', '.join(load_args)
         res = b.run_javascript("loadTracesFromURLs([%s])" % load_args_str)
 
-      @trace
+      @traced
       def on_load_failed(*args):
         res = "[%s]" % "\n".join(args)
         logging.error('Loading traces failed with %s' % res)
@@ -104,7 +104,7 @@ def main(parser):
         if not options.debug:
           message_loop.quit_main_loop()
 
-      @trace
+      @traced
       def on_load_done():
         logging.debug('Loading traces done.')
 
