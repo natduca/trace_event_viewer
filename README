@@ -13,7 +13,7 @@ QuickStart
 
 *** Make sure to git submodule update --init after cloning ***
 
-./trace_event_viewer trace_event/data/big_trace.json
+./trace-event-viewer trace_event/data/big_trace.json
     w/a/s/d to move around the UI
 
 Now, make your favorite language generate trace files, according to
