@@ -22,7 +22,7 @@ class BrowserGtk(gtk.Window, browser.BrowserBase):
   def __init__(self):
     message_loop.init_main_loop()
     gtk.Window.__init__(self)
-    self.set_title("Trace Event Viewer")
+    self.set_title_extra("")
     browser.BrowserBase.__init__(self)
 
     self.set_size_request(browser.default_size[0], browser.default_size[1])
@@ -58,6 +58,11 @@ class BrowserGtk(gtk.Window, browser.BrowserBase):
     vbox.pack_start(self._debug_ctrl, False, True)
     self.add(vbox)
 
+  def set_title_extra(self, extra = None):
+    if extra and len(extra):
+      self.set_title("Trace Event Viewer - %s" % extra)
+    else:
+      self.set_title("Trace Event Viewer")
 
   def _on_debug_keypress(self, entry, event):
     keyname = gtk.gdk.keyval_name(event.keyval)

@@ -19,7 +19,8 @@ import wx.webkit
 
 class BrowserWx(browser.BrowserBase):
   def __init__(self):
-    self._frame = wx.Frame(None, -1, "Trace Event Viewer",size=browser.default_size)
+    self._frame = wx.Frame(None, -1, "",size=browser.default_size)
+    self.set_title_extra("")
     message_loop.init_main_loop()
     browser.BrowserBase.__init__(self)
 
@@ -50,6 +51,12 @@ class BrowserWx(browser.BrowserBase):
     else:
       self._debug_ctrl.Hide()
     self._closed = False
+
+  def set_title_extra(self, extra = None):
+    if extra and len(extra):
+      self._frame.SetTitle("Trace Event Viewer - %s" % extra)
+    else:
+      self._frame.SetTitle("Trace Event Viewer")
 
   def on_quit(self, *args):
     self.on_evt_close(None)

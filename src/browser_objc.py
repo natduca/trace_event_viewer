@@ -29,7 +29,7 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
       NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask,
       NSBackingStoreBuffered,
       False)
-    self.setTitle_("TraceViewer")
+    self.set_title_extra("")
     self.contentView().setAutoresizesSubviews_(True)
 
     self._webview = WebView.new()
@@ -40,6 +40,12 @@ class BrowserObjc(NSWindow,browser.BrowserBase):
 
     self._loaded = False
     return self
+
+  def set_title_extra(self, extra = None):
+    if extra and len(extra):
+      self.setTitle_("Trace Event Viewer - %s" % extra)
+    else:
+      self.setTitle_("Trace Event Viewer")
 
   def close(self):
     self.orderOut_(self)

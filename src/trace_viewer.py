@@ -86,6 +86,7 @@ def main(parser):
     @traced
     def do_init():
       b = browser.Browser()
+      b.set_title_extra(", ".join([os.path.basename(x) for x in args]))
       shim = chrome_shim.ChromeShim(b)
       b.load_url(urllib.basejoin(host.baseurl, "/src/index.html"))
       b.show()
