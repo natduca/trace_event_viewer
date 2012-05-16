@@ -25,6 +25,7 @@ def main(parser):
   parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Add UI for JS debugging')
   parser.add_option('--trace', dest='trace', action='store_true', default=False, help='Records performance tracing information to %s.trace' % sys.argv[0])
+  parser.add_option('--refresh-rate', '-r', dest='refresh_rate', action='store', default=60.0, help='The refresh rate for the screen, in hertz')
   (options, args) = parser.parse_args()
 
   if options.trace:
@@ -108,6 +109,7 @@ def main(parser):
       @traced
       def on_load_done():
         logging.debug('Loading traces done.')
+        res = b.run_javascript("setRefreshRate(%f)" % float(options.refresh_rate))
 
       shim.add_event_listener('ready', do_load_via_url)
       shim.add_event_listener('loadTracesFromURLs_Failed', on_load_failed)

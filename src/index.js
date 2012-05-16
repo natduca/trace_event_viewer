@@ -99,7 +99,12 @@ var g_timelineView;
     return true;
   }
 
+  function setRefreshRate(hz) {
+    timelineView.timeline.viewport.gridStep_ = 1000 / hz;
+  }
+
   window.loadTracesFromURLs = loadTracesFromURLs;
   window.loadTraces = loadTraces;
+  window.setRefreshRate = setRefreshRate;
   document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 })();
