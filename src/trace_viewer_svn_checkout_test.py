@@ -13,12 +13,12 @@
 # limitations under the License.
 import unittest
 import deps
-from chrome_svn_checkout import ChromeSVNCheckout
+from trace_viewer_svn_checkout import TraceViewerSVNCheckout
 
-class ChromeSVNCheckoutTest(unittest.TestCase):
+class TraceViewerSVNCheckoutTest(unittest.TestCase):
   def test_download(self):
-    fe = ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-    rev = fe.svn_getrev(fe.shared_path)
-    if type(deps.CHROME_SVN_REV) == int:
-      self.assertEquals(rev, deps.CHROME_SVN_REV)
+    fe = TraceViewerSVNCheckout(deps.TRACE_VIEWER_SVN_URL, deps.TRACE_VIEWER_SVN_REV)
+    rev = fe.svn_getrev(fe.trace_viewer_checkout_path)
+    if type(deps.TRACE_VIEWER_SVN_REV) == int:
+      self.assertEquals(rev, deps.TRACE_VIEWER_SVN_REV)
     fe.close()

@@ -3,26 +3,9 @@
 // found in the LICENSE file.
 var g_timelineView;
 (function() {
-  var include = function(path) {
-    document.write('<script src="' + path + '"></script>');
-  };
-  include("/chrome/tracing/overlay.js");
-  include("/chrome/tracing/timeline_model.js");
-  include("/chrome/tracing/linux_perf_importer.js");
-  include("/chrome/tracing/trace_event_importer.js");
-  include("/chrome/tracing/sorted_array_utils.js");
-  include("/chrome/tracing/measuring_stick.js");
-  include("/chrome/tracing/timeline.js");
-  include("/chrome/tracing/timeline_track.js");
-  include("/chrome/tracing/fast_rect_renderer.js");
-  include("/chrome/tracing/timeline_view.js");
-
-  var timelineView;
-
   function onDOMContentLoaded() {
-    timelineView = $('timeline-view');
-    g_timelineView = timelineView;
-    cr.ui.decorate(timelineView, tracing.TimelineView);
+    g_timelineView = document.querySelector('#view');
+    base.ui.decorate(g_timelineView, tracing.TimelineView);
     chrome.send('ready');
   }
 
@@ -90,12 +73,12 @@ var g_timelineView;
   }
 
   function loadTraces(events) {
-    if (timelineView == undefined)
+    if (g_timelineView == undefined)
       throw Error('timelineview is null');
 
     var m = new tracing.TimelineModel();
-    m.importEvents(events[0], true, events.slice(1));
-    timelineView.model = m;
+    m.importTraces(events, true)
+    g_timelineView.model = m;
     return true;
   }
 

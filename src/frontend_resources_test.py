@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import chrome_svn_checkout
+import trace_viewer_svn_checkout
 import deps
 import unittest
 
@@ -19,8 +19,8 @@ from frontend_resources import FrontendResources
 
 class FrontendResourcesTest(unittest.TestCase):
   def test_fe_with_dir(self):
-    chrome_checkout = chrome_svn_checkout.ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-    self.fe = FrontendResources(chrome_checkout.data_dir)
+    trace_viewercheckout = trace_viewer_svn_checkout.TraceViewerSVNCheckout(deps.TRACE_VIEWER_SVN_URL, deps.TRACE_VIEWER_SVN_REV)
+    self.fe = FrontendResources(trace_viewercheckout.trace_viewer_checkout_path)
     assert len(self.fe.dir_mappings) != 0
 
   def test_fe_with_checkout(self):

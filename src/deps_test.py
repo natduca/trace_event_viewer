@@ -22,16 +22,18 @@ class DepsTest(unittest.TestCase):
 
   def test_svn_base_and_rev(self, rev=None):
     if rev == None:
-      rev = deps.CHROME_SVN_REV
+      rev = deps.TRACE_VIEWER_SVN_REV
+
     if rev == 'HEAD':
-      base = deps.CHROME_SVN_BASE
+      base = deps.TRACE_VIEWER_SVN_URL
     else:
-      base = deps.CHROME_SVN_BASE.replace("/svn/", "/svn/!svn/bc/%s/" % rev)
+      base = deps.TRACE_VIEWER_SVN_URL.replace("/svn/", "/svn/!svn/bc/%s/" % rev)
 
     self.assertTrue(base.endswith('/'))
+    print base
     urllib2.urlopen(base).read()
-    u1 = urllib.basejoin(base, 'chrome/browser/resources/shared/js/cr.js')
-    u2 = urllib.basejoin(base, 'chrome/browser/resources/tracing/timeline.js')
+    u1 = urllib.basejoin(base, 'src/timeline_view.js')
+    u2 = urllib.basejoin(base, 'build/generate_standalone_timeline_view.py')
     urllib2.urlopen(u1).read()
     urllib2.urlopen(u2).read()
 

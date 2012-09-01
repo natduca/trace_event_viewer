@@ -12,7 +12,7 @@ found in the LICENSE file.
   -webkit-user-select: none;
 }
 
-#timeline-view {
+#view {
   overflow: hidden;
   position: absolute;
   top: 0;
@@ -33,21 +33,13 @@ tabbox tabpanels {
 }
 
 </style>
-<link rel="stylesheet" href="/chrome/tracing/overlay.css">
-<link rel="stylesheet" href="/chrome/tracing/timeline_view.css">
-<link rel="stylesheet" href="/chrome/tracing/timeline.css">
-<link rel="stylesheet" href="/chrome/shared/css/tabs.css">
-<script src="/chrome/shared/js/cr.js"></script>
-<script src="/chrome/shared/js/cr/event_target.js"></script>
-<script src="/chrome/shared/js/cr/ui.js"></script>
-<script src="/chrome/shared/js/cr/ui/focus_outline_manager.js"></script>
-<script src="/chrome/shared/js/cr/ui/tabs.js"></script>
-<script src="/chrome/shared/js/util.js"></script>
+<link rel="stylesheet" href="/trace-viewer-build/timeline_view.css">
+<script src="/trace-viewer-build/timeline_view.js"></script>
 <script src="index.js"></script>
-<title>Trace Event</title>
+<title>Trace Event Viewer</title>
 </head>
 <body>
-  <div id="timeline-view">
+  <div id="view">
   </div>
 </body>
 </html>

@@ -19,27 +19,22 @@ import subprocess
 import sys
 import urllib
 
-class ChromeSVNCheckout(object):
-  def __init__(self, base_url, rev, persist = True):
+class TraceViewerSVNCheckout(object):
+  def __init__(self, trace_viewer_svn_url, rev, persist = True):
     self.persist = persist
-    self.base_url = base_url
-    # create a directory hierarchy to do tests in
+    self.trace_viewer_svn_url = trace_viewer_svn_url
+
+    # Create a directory hierarchy to do tests in.
     trace_dir = os.path.abspath(os.path.join(os.path.dirname(sys.modules[__name__].__file__), '..'))
     assert os.path.exists(trace_dir)
 
     third_party_dir = os.path.join(trace_dir, 'third_party')
-    self.data_dir = os.path.join(third_party_dir, 'chrome')
+    self.trace_viewer_checkout_path = os.path.join(third_party_dir, 'trace-viewer')
     if not persist:
-      if os.path.exists(self.data_dir):
-        self.rm_rf(self.data_dir)
+      if os.path.exists(self.trace_viewer_checkout_path):
+        self.rm_rf(self.trace_viewer_checkout_path)
 
-    shared_url = self.url_to('chrome/browser/resources/shared/')
-    self.shared_path = self.path_to('shared')
-    tracing_url = self.url_to('chrome/browser/resources/tracing/')
-    self.tracing_url = self.path_to('tracing')
-
-    self.svn_update(shared_url, rev, self.shared_path)
-    self.svn_update(tracing_url, rev, self.tracing_url)
+    self.svn_update(trace_viewer_svn_url, rev, self.trace_viewer_checkout_path)
 
     ok,err = self.verify_checkout()
     if not ok:
@@ -48,8 +43,8 @@ class ChromeSVNCheckout(object):
   def verify_checkout(self):
     """Makes sure that key files are present."""
     required = [
-      'shared/js/cr.js',
-      'tracing/timeline.js'
+      'build/generate_standalone_timeline_view.py',
+      'src/timeline_view.js'
       ]
     missing = []
     for r in required:
@@ -125,16 +120,13 @@ class ChromeSVNCheckout(object):
     output = proc.communicate()[0]
     return (proc.returncode, output)
 
-  def url_to(self, subpath):
-    return urllib.basejoin(self.base_url, subpath)
-
   def path_to(self, subpath):
-    return os.path.join(self.data_dir, subpath)
+    return os.path.join(self.trace_viewer_checkout_path, subpath)
 
   def close(self):
-    if not self.persist and os.path.exists(self.data_dir):
-      self.rm_rf(self.data_dir)
-    self.data_dir = None
+    if not self.persist and os.path.exists(self.trace_viewer_checkout_path):
+      self.rm_rf(self.trace_viewer_checkout_path)
+    self.trace_viewer_checkout_path = None
 
   def rm_rf(self, dirname):
     if not os.path.exists(dirname):

@@ -22,7 +22,7 @@ def main_usage():
   return "Usage: %prog [options] trace_file1 [trace_file2 ...]"
 
 def main(parser):
-  parser.add_option('--chrome', dest='chrome_path', default=None, help='Instead of getting a copy of the viewer from chromium via chromium.org, use this path instead')
+  parser.add_option('--trace-viewer', dest='tev_path', default=None, help='Instead of getting a copy of trace-viewer from svn, use this path instead')
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Add UI for JS debugging')
   parser.add_option('--trace', dest='trace', action='store_true', default=False, help='Records performance tracing information to %s.trace' % sys.argv[0])
   parser.add_option('--refresh-rate', '-r', dest='refresh_rate', action='store', default=60.0, help='The refresh rate for the screen, in hertz')
@@ -53,20 +53,20 @@ def main(parser):
       print "Trace file %s does not exist" % a
       return 255
 
-  if options.chrome_path:
-    options.chrome_path = os.path.expanduser(options.chrome_path)
+  if options.tev_path:
+    options.tev_path = os.path.expanduser(options.tev_path)
     ok = True
-    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/tracing/timeline.js"))
-    ok &= os.path.exists(os.path.join(options.chrome_path, "chrome/browser/resources/shared/js/cr.js"))
+    ok &= os.path.exists(os.path.join(options.tev_path, "build/generate_standalone_timeline_view.py"))
+    ok &= os.path.exists(os.path.join(options.tev_path, "src/timeline_view.js"))
     if not ok:
-      print "--chrome should point to the base chrome 'src' directory"
+      print "--trace-viewer should point to the trace-viewer directory"
       return 0
-    options.chrome_path = os.path.join(options.chrome_path, "chrome/browser/resources")
+    options.tev_path = options.tev_path
 
   host = None
   try:
-    if options.chrome_path:
-      fer = frontend_resources.FrontendResources(options.chrome_path)
+    if options.tev_path:
+      fer = frontend_resources.FrontendResources(options.tev_path)
     else:
       fer = frontend_resources.FrontendResources()
     dir_mappings = dict(fer.dir_mappings)

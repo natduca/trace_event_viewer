@@ -14,5 +14,5 @@
 from closure_jsunit_runner import *
 
 class FrontendTest(ClosureJSUnitRunner):
-  def test_overlay(self):
-    self.go("/chrome/tracing/overlay_test.html")
+  def DISABLED_test_overlay(self):
+    self.go("/trace-viewer/src/tests.html")

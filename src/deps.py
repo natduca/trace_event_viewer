@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CHROME_SVN_BASE = 'http://src.chromium.org/svn/trunk/src/'
-CHROME_SVN_REV = 128813
+TRACE_VIEWER_SVN_URL = 'http://trace-viewer.googlecode.com/svn/trunk/'
+TRACE_VIEWER_SVN_REV = 148

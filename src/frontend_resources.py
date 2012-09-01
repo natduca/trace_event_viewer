@@ -11,22 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import chrome_svn_checkout
-import deps
 import os
+import shutil
 import sys
 import tempfile
 
+import deps
+import trace_viewer_svn_checkout
+
 class FrontendResources():
-  def __init__(self, chrome_dir=None):
-    if chrome_dir:
-      self.chrome_checkout = None
-      self.chrome_dir = chrome_dir
+  def __init__(self, tev_dir=None):
+    if tev_dir:
+      self.tev_checkout = None
+      self.tev_dir = tev_dir
     else:
-      self.chrome_checkout = chrome_svn_checkout.ChromeSVNCheckout(deps.CHROME_SVN_BASE, deps.CHROME_SVN_REV)
-      self.chrome_dir = self.chrome_checkout.data_dir
+      self.tev_checkout = trace_viewer_svn_checkout.TraceViewerSVNCheckout(deps.TRACE_VIEWER_SVN_URL, deps.TRACE_VIEWER_SVN_REV)
+      self.tev_dir = self.tev_checkout.trace_viewer_checkout_path
 
     self.data_dir = tempfile.mkdtemp()
+    self.trace_viewer_build_dir = tempfile.mkdtemp()
+    self.generate_standalone_timeline_view()
 
     # make sure we can find es5 shim
     self.es5shim_dir = os.path.join(os.path.dirname(__file__), "../third_party/es5-shim/")
@@ -49,20 +53,37 @@ class FrontendResources():
     if len(missing):
       raise Exception("Couldn't find %s in %s", (", ".join(missing), src_dir))
 
+  def generate_standalone_timeline_view(self):
+    try:
+      sys.path.append(self.tev_dir)
+      import build.generate_standalone_timeline_view as generator
+      with open(os.path.join(self.trace_viewer_build_dir,
+                             "timeline_view.js"), 'w') as f:
+        f.write(generator.generate_js())
+
+      with open(os.path.join(self.trace_viewer_build_dir,
+                             "timeline_view.css"), 'w') as f:
+        f.write(generator.generate_css())
+
+    finally:
+      sys.path.remove(self.tev_dir)
+
   @property
   def dir_mappings(self):
     return {
         "/src" : self.src_dir,
-        "/chrome" : self.chrome_dir,
         "/es5-shim" : self.es5shim_dir,
         "/data": self.data_dir,
+        "/trace-viewer": self.tev_dir,
+        "/trace-viewer-build": self.trace_viewer_build_dir,
         }
 
   def close(self):
-    if self.chrome_checkout:
-      self.chrome_checkout.close()
+    if self.tev_checkout:
+      self.tev_checkout.close()
     if self.data_dir:
-      for e in os.dir(self.data_dir):
-        p = os.path.join(self.data_dir, e)
-        os.remove(p)
-      os.rmdir(self.data_dir)
+      shutil.rmtree(self.data_dir)
+      self.data_dir = None
+    if self.trace_viewer_build_dir:
+      shutil.rmtree(self.trace_viewer_build_dir)
+      self.trace_viewer_build_dir = None
