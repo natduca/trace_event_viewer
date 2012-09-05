@@ -16,7 +16,12 @@ import logging
 import message_loop
 import sys
 import gtk
-import webkit
+
+try:
+  import webkit
+except ImportError:
+  sys.stderr.write("Import of webkit failed. Have you installed python-webkit?\n")
+  sys.exit(1)
 
 class BrowserGtk(gtk.Window, browser.BrowserBase):
   def __init__(self):
