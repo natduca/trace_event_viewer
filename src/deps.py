@@ -13,4 +13,4 @@
 # limitations under the License.
 
 TRACE_VIEWER_SVN_URL = 'http://trace-viewer.googlecode.com/svn/trunk/'
-TRACE_VIEWER_SVN_REV = 148
+TRACE_VIEWER_SVN_REV = 168
