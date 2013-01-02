@@ -3,6 +3,3 @@
 .#*
 *.swp
 *.trace
-third_party/chrome
-third_party/trace-viewer
-build

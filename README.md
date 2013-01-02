@@ -14,17 +14,8 @@ QuickStart
 
 Dependencies
 ==========
-Linux:
-
-1. python-gtk2
-2. python-webkit
-
-OSX: either,
-
-- wxPython 2.8-osx-unicode-2.6 from (http://www.wxpython.org/download.php#stable)[http://www.wxpython.org/download.php#stable], or
-- Pass `--objc` to enable the [beta quality] PyObjC-based GUI
-
-Windows: Not supported, but should be possible.
+- python2.6 or better
+- chrome
 
 
 Trace file format

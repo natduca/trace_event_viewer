@@ -1,5 +1,1 @@
-This code downloads the trace viewer code from the Chromium repository, starts
-up a a local HTTP server that hosts that code, and then brings it up a WebKit
-instance via either PyGtk, WxPython, or PyObjC. The HTTP server then tricks the frontend
-code into thinking that its running inside Chromium, giving you access to the
-usual suite of trace viewing & analysis capabilities, less Chromium.
+This code runs the trace viewer code using py-chrome-app.

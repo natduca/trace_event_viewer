@@ -21,7 +21,8 @@ from trace_event import *
 def main_usage():
   return "Usage: %prog [options] trace_file1 [trace_file2 ...]"
 
-def main(parser):
+def main():
+  parser = optparse.OptionParser()
   parser.add_option('--trace-viewer', dest='tev_path', default=None, help='Instead of getting a copy of trace-viewer from svn, use this path instead')
   parser.add_option('--debug', dest='debug', action='store_true', default=False, help='Add UI for JS debugging')
   parser.add_option('--trace', dest='trace', action='store_true', default=False, help='Records performance tracing information to %s.trace' % sys.argv[0])
