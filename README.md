@@ -1,6 +1,7 @@
-trace\_event\_viewer` is a standalone version of Chrome's about:tracing UI for
-viewing multithreaded performance traces. Works on OSX and Linux using Chrome
-Apps v2 to make it look like a regular app.
+trace\_event\_viewer` is a standalone version of Chrome's
+about:tracing UI for viewing multithreaded performance traces. Works
+on OSX and Linux and even Windows using Chrome Apps v2 to make it look
+like a regular app.
 
 The core ui of this tool is a javascript app, hosted in a separate project at
 [trace-viewer](http://code.google.com/p/trace-viewer/). All importing is handled
