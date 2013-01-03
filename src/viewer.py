@@ -22,7 +22,7 @@ def _setupPathForModule(mod_dir, mod_name):
     "..", "third_party", mod_dir)
   if not os.path.exists(path):
     sys.stderr.write('Could not find %s\n' % os.path.relpath(path))
-    sys.stderr.write('Did you forget git submodule ==update --init\n')
+    sys.stderr.write('Did you forget git submodule --update --init\n')
     sys.exit(1)
   if path not in sys.path:
     sys.path.append(path)
@@ -30,7 +30,7 @@ def _setupPathForModule(mod_dir, mod_name):
     __import__(mod_name, {}, {}, [])
   except ImportError:
     sys.stderr.write('Could not import %s from %s\n' % (mod_name, os.path.relpath(path)))
-    sys.stderr.write('Did you forget git submodule ==update --init\n')
+    sys.stderr.write('Did you forget git submodule --update --init\n')
     sys.exit(1)
 
 def _setupPath():
