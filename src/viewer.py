@@ -47,7 +47,7 @@ class ViewerApp(object):
   def __init__(self, options, args):
     manifest_file = os.path.join(os.path.dirname(__file__),
                                  'chrome_app', 'manifest.json')
-    self._app = chromeapp.App('quickopen',
+    self._app = chromeapp.App('trace-event-viewer',
                               manifest_file,
                               debug_mode=options.debug_mode)
     self._args = args
