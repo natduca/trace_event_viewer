@@ -3,3 +3,5 @@
 .#*
 *.swp
 *.trace
+src/chrome_app/timeline_view.js
+src/chrome_app/timeline_view.css

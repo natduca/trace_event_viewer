@@ -1,7 +1,12 @@
 trace\_event\_viewer` is a standalone version of Chrome's about:tracing UI for
-viewing multithreaded performance traces. Works on OSX and Linux.
+viewing multithreaded performance traces. Works on OSX and Linux using Chrome
+Apps v2 to make it look like a regular app.
 
-The core ui of this tool is a javascript app, hosted in a separate project at [trace-viewer](http://code.google.com/p/trace-viewer/). All importing is handled by that module, so [head on over to its project](http://code.google.com/p/trace-viewer/) to find out how to generate traces.
+The core ui of this tool is a javascript app, hosted in a separate project at
+[trace-viewer](http://code.google.com/p/trace-viewer/). All importing is handled
+by that module, so [head on over to its
+project](http://code.google.com/p/trace-viewer/) to find out how to generate
+traces.
 
 QuickStart
 ========
@@ -15,7 +20,7 @@ QuickStart
 Dependencies
 ==========
 - python2.6 or better
-- chrome
+- chrome [yes, chrome]
 
 
 Trace file format

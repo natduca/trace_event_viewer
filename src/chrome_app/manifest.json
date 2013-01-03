@@ -9,6 +9,7 @@
     }
   },
   "permissions": [
-    "http://localhost:*/"
+    "http://localhost:*/",
+    "storage"
   ]
 }

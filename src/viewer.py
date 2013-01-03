@@ -27,7 +27,7 @@ def _setupPathForModule(mod_dir, mod_name):
   if path not in sys.path:
     sys.path.append(path)
   try:
-    __import__(mod_name, {}, {}, True)
+    __import__(mod_name, {}, {}, [])
   except ImportError:
     sys.stderr.write('Could not import %s from %s\n', mod_name, os.path.relpath(path))
     sys.stderr.write('Did you forget git submodule ==update --init\n')
@@ -36,6 +36,7 @@ def _setupPathForModule(mod_dir, mod_name):
 def _setupPath():
   _setupPathForModule("py-chrome-app", 'chromeapp')
   _setupPathForModule("py_trace_event", 'trace_event')
+  _setupPathForModule("trace-viewer", 'build')
 
 _setupPath()
 
@@ -54,6 +55,22 @@ class ViewerApp(object):
 
   def _InitInstance(self):
     self._app_instance.AddListener('load_nth_arg', self.OnLoadNthArg)
+    self._timeline_view_js_file = os.path.join(os.path.dirname(__file__),
+                                              'chrome_app', 'timeline_view.js')
+    self._timeline_view_css_file = os.path.join(os.path.dirname(__file__),
+                                              'chrome_app', 'timeline_view.css')
+
+    from build import generate_standalone_timeline_view
+    with open(self._timeline_view_js_file, 'w') as f:
+      f.write(generate_standalone_timeline_view.generate_js())
+    with open(self._timeline_view_css_file, 'w') as f:
+      f.write(generate_standalone_timeline_view.generate_css())
+
+  def _CleanupInstance(self):
+    if os.path.exists(self._timeline_view_js_file):
+      os.unlink(self._timeline_view_js_file)
+    if os.path.exists(self._timeline_view_css_file):
+      os.unlink(self._timeline_view_css_file)
 
   def OnLoadNthArg(self, args):
     index = args['index']
@@ -69,6 +86,7 @@ class ViewerApp(object):
         self._InitInstance()
         return self._app_instance.Run()
       finally:
+        self._CleanupInstance()
         self._app_instance = None
 
 def main(args):
