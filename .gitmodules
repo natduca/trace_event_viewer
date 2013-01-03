@@ -4,3 +4,6 @@
 [submodule "third_party/py-chrome-app"]
 	path = third_party/py-chrome-app
 	url = https://github.com/natduca/py-chrome-app.git
+[submodule "third_party/trace-viewer"]
+	path = third_party/trace-viewer
+	url = http://git.chromium.org/external/trace-viewer.git
