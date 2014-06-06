@@ -36,7 +36,7 @@ def _setupPathForModule(mod_dir, mod_name):
 def _setupPath():
   _setupPathForModule("py-chrome-app", 'chromeapp')
   _setupPathForModule("py_trace_event", 'trace_event')
-  _setupPathForModule("trace-viewer", 'build')
+  _setupPathForModule("trace-viewer", 'trace_viewer.build')
 
 _setupPath()
 
@@ -60,11 +60,13 @@ class ViewerApp(object):
     self._timeline_view_css_file = os.path.join(os.path.dirname(__file__),
                                               'chrome_app', 'timeline_view.css')
 
-    from build import generate_standalone_timeline_view
+    import tvcm
+    from trace_viewer.build import generate_standalone_timeline_view
+    load_sequence = generate_standalone_timeline_view.CalcLoadSequence()
     with open(self._timeline_view_js_file, 'w') as f:
-      f.write(generate_standalone_timeline_view.generate_js())
+      f.write(tvcm.GenerateJS(load_sequence))
     with open(self._timeline_view_css_file, 'w') as f:
-      f.write(generate_standalone_timeline_view.generate_css())
+      f.write(tvcm.GenerateCSS(load_sequence))
 
   def _CleanupInstance(self):
     if os.path.exists(self._timeline_view_js_file):
